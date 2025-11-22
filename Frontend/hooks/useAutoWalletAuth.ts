@@ -53,6 +53,31 @@ export function useAutoWalletAuth() {
 
     setState((prev) => ({ ...prev, isChecking: true, error: null }));
 
+    // Development mode - skip database calls
+    if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+      console.log('🔧 Development mode: Skipping database authentication');
+      setState((prev) => ({
+        ...prev,
+        isChecking: false,
+        userExists: true,
+        currentUser: {
+          _id: 'dev-user-id',
+          firstName: 'Dev',
+          lastName: 'User',
+          username: 'devuser',
+          email: 'dev@example.com',
+          walletAddress: address,
+          bio: 'Development mode user',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        isAuthenticated: true,
+        shouldShowSignup: false,
+        error: null,
+      }));
+      return;
+    }
+
     try {
       // First check if user exists
       const checkResponse = await fetch("/api/auth/check-user", {

@@ -36,6 +36,15 @@ export function AuthChoiceModal({
     const checkUserExists = async () => {
       if (address && isOpen && userExists === null) {
         setIsChecking(true);
+
+        // Development mode - skip database calls
+        if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+          console.log('🔧 Development mode: Assuming user exists');
+          setUserExists(true);
+          setIsChecking(false);
+          return;
+        }
+
         try {
           const response = await fetch("/api/auth/check-user", {
             method: "POST",
