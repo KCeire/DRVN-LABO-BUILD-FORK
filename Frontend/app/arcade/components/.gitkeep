@@ -1,0 +1,12 @@
+# Arcade Components Directory
+
+This directory will contain arcade-specific reusable components:
+- XPProgressBar
+- GameCard
+- AchievementBadge
+- GameInfoModal
+- PlayerStatsWidget
+- FeaturedGameBanner
+- And more...
+
+Components will be created in the next implementation phase.
