@@ -16,6 +16,7 @@ import {
   Coins,
   Car,
   Tag,
+  Gamepad2,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -207,6 +208,12 @@ export function DRVNDashboard() {
       isGreen: true,
     },
     { icon: RiNewsFill, label: "DRVN Culture", id: "culture", isGreen: true },
+    {
+      icon: Gamepad2,
+      label: "Arcade",
+      id: "arcade",
+      isGreen: true,
+    },
     {
       icon: Tag,
       label: "Marketplace",
@@ -692,6 +699,13 @@ export function DRVNDashboard() {
             />
           </div>
         );
+
+      case "arcade":
+        // Navigate to /arcade route (will redirect to /arcade/dashboard)
+        if (typeof window !== 'undefined') {
+          window.location.href = '/arcade';
+        }
+        return null;
 
       default:
         return (
