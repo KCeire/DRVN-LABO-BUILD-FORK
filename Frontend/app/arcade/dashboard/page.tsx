@@ -6,10 +6,9 @@ import Link from 'next/link';
 import PlayerStatsWidget from '../components/PlayerStatsWidget';
 import FeaturedGameBanner from '../components/FeaturedGameBanner';
 import SavedGames from '../components/SavedGames';
-import GameGrid from '../components/GameGrid';
 import GameInfoModal from '../components/GameInfoModal';
 import { useBookmarks } from '../contexts/BookmarkContext';
-import type { PlayerStats, Game, SavedGame } from '../types';
+import type { PlayerStats, Game } from '../types';
 
 // Placeholder Data
 const PLACEHOLDER_STATS: PlayerStats = {
@@ -114,11 +113,6 @@ const PLACEHOLDER_GAMES: Game[] = [
   },
 ];
 
-const PLACEHOLDER_SAVED_GAMES: SavedGame[] = [
-  { gameId: '1', savedAt: '2024-11-20', lastPlayedAt: '2 hours ago' },
-  { gameId: '3', savedAt: '2024-11-18', lastPlayedAt: '1 day ago' },
-  { gameId: '6', savedAt: '2024-11-17', lastPlayedAt: '3 days ago' },
-];
 
 export default function ArcadeDashboardPage() {
   // State
@@ -126,7 +120,7 @@ export default function ArcadeDashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   // Use shared bookmark context
-  const { bookmarkedGames, toggleBookmark, isBookmarked } = useBookmarks();
+  const { toggleBookmark, isBookmarked } = useBookmarks();
 
   // Handlers
   const handleGameClick = (game: Game) => {

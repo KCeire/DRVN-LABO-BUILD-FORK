@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Filter, Bookmark, BookmarkCheck, Gamepad2 } from 'lucide-react';
+import { Search, Bookmark, BookmarkCheck, Gamepad2 } from 'lucide-react';
 import GameGrid from '../components/GameGrid';
 import GameInfoModal from '../components/GameInfoModal';
 import { useBookmarks } from '../contexts/BookmarkContext';
