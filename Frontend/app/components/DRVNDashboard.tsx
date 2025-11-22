@@ -701,11 +701,41 @@ export function DRVNDashboard() {
         );
 
       case "arcade":
-        // Navigate to /arcade route (will redirect to /arcade/dashboard)
-        if (typeof window !== 'undefined') {
-          window.location.href = '/arcade';
-        }
-        return null;
+        // Render arcade content within main app context
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-white font-mono flex items-center gap-2">
+                <Gamepad2 className="w-6 h-6 text-[#00daa2]" />
+                Arcade
+              </h1>
+            </div>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
+              <div className="space-y-4">
+                <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto">
+                  <Gamepad2 className="w-8 h-8 text-[#00daa2]" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Arcade Coming Soon</h3>
+                <p className="text-gray-400 max-w-md mx-auto">
+                  Experience gaming like never before with our upcoming arcade section.
+                  Featuring prediction games, tournaments, and rewards.
+                </p>
+                <div className="pt-4">
+                  <Button
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.open('/arcade', '_blank');
+                      }
+                    }}
+                    className="bg-[#00daa2] text-black hover:bg-[#00c49a]"
+                  >
+                    Preview Arcade (New Tab)
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
 
       default:
         return (
