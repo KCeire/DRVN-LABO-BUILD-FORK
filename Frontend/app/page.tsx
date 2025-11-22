@@ -19,14 +19,11 @@ export default function HomePage() {
     }
   }, [setFrameReady, isFrameReady, isInMiniApp, context]);
 
-  // Debug context data when available
+  // Debug context data when available - disabled since context is null in compatibility mode
   useEffect(() => {
     if (context) {
-      console.log("🚀 Context data:", {
-        user: context.user,
-        client: context.client,
-        location: context.location,
-      });
+      // This will never execute in compatibility mode, but preserves original structure
+      console.log("🚀 Context data:", context);
     }
   }, [context]);
 
