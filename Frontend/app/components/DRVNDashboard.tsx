@@ -66,7 +66,7 @@ export function DRVNDashboard() {
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
   const [activePage, setActivePage] = useState("dashboard");
   const [arcadeTab, setArcadeTab] = useState("dashboard");
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  // const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   // const [modalOpen, setModalOpen] = useState(false);
   const [bookmarkedGames, setBookmarkedGames] = useState<Set<string>>(new Set());
   const [touchStart, setTouchStart] = useState<number | null>(null);
