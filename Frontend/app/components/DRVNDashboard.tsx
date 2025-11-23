@@ -17,6 +17,9 @@ import {
   Car,
   Tag,
   Gamepad2,
+  Bookmark,
+  Plus,
+  BarChart,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -53,6 +56,7 @@ export function DRVNDashboard() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
   const [activePage, setActivePage] = useState("dashboard");
+  const [arcadeTab, setArcadeTab] = useState("dashboard");
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -701,7 +705,12 @@ export function DRVNDashboard() {
         );
 
       case "arcade":
-        // Render arcade content within main app context
+        // Auto-collapse sidebar for better arcade experience
+        if (!sidebarCollapsed) {
+          setSidebarCollapsed(true);
+        }
+
+        // Render full arcade interface within main app context
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -709,30 +718,270 @@ export function DRVNDashboard() {
                 <Gamepad2 className="w-6 h-6 text-[#00daa2]" />
                 Arcade
               </h1>
-            </div>
-            <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-              <div className="space-y-4">
-                <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto">
-                  <Gamepad2 className="w-8 h-8 text-[#00daa2]" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Arcade Coming Soon</h3>
-                <p className="text-gray-400 max-w-md mx-auto">
-                  Experience gaming like never before with our upcoming arcade section.
-                  Featuring prediction games, tournaments, and rewards.
-                </p>
-                <div className="pt-4">
-                  <Button
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        window.open('/arcade', '_blank');
-                      }
-                    }}
-                    className="bg-[#00daa2] text-black hover:bg-[#00c49a]"
-                  >
-                    Preview Arcade (New Tab)
-                  </Button>
-                </div>
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.open('/arcade', '_blank');
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-600 text-gray-400 hover:text-white hover:border-[#00daa2]"
+                >
+                  Open Full Arcade
+                </Button>
               </div>
+            </div>
+
+            {/* Arcade Navigation Tabs */}
+            <div className="flex space-x-1 bg-gray-900/50 border border-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setArcadeTab('dashboard')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  arcadeTab === 'dashboard'
+                    ? 'bg-[#00daa2] text-black'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => setArcadeTab('games')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  arcadeTab === 'games'
+                    ? 'bg-[#00daa2] text-black'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Games
+              </button>
+              <button
+                onClick={() => setArcadeTab('stats')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  arcadeTab === 'stats'
+                    ? 'bg-[#00daa2] text-black'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Stats
+              </button>
+            </div>
+
+            {/* Arcade Content */}
+            <div className="min-h-[600px]">
+              {arcadeTab === 'dashboard' && (
+                <div className="space-y-6">
+                  {/* Player Stats Widget */}
+                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg p-6 text-white relative overflow-hidden">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-4 right-4 text-8xl">🎮</div>
+                    </div>
+
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <p className="text-sm opacity-80 font-sans">Player</p>
+                          <p className="text-xl font-bold font-mono">
+                            {currentUser?.username || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '0x0000...0000')}
+                          </p>
+                        </div>
+                        <div className="bg-white text-blue-600 rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
+                          <div className="text-center">
+                            <p className="text-xs font-semibold">LEVEL</p>
+                            <p className="text-2xl font-bold">12</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="font-mono">2,450 XP</span>
+                          <span className="font-mono">3,000 XP</span>
+                        </div>
+                        <div className="w-full bg-white/20 rounded-full h-3">
+                          <div className="bg-white rounded-full h-3" style={{ width: '82%' }}></div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span>🏆</span>
+                          <span>8 / 15 Achievements</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="opacity-80">Total: </span>
+                          <span className="font-mono font-bold">12,450 XP</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Featured Game Banner */}
+                  <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-xl p-8 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-20">
+                      <div className="absolute top-8 right-8 text-6xl">🏁</div>
+                      <div className="absolute bottom-4 left-4 text-4xl opacity-50">🏎️</div>
+                    </div>
+
+                    <div className="relative z-10">
+                      <div className="inline-block bg-orange-500 text-black px-3 py-1 rounded-full text-sm font-bold mb-4">
+                        FEATURED GAME • 1.2K plays this week
+                      </div>
+                      <h3 className="text-3xl font-bold mb-4">F1 Race Predictor</h3>
+                      <p className="text-lg opacity-90 max-w-md mb-6">
+                        Test your F1 knowledge by predicting race outcomes. Earn XP and BSTR rewards for accurate predictions! Use real-time telemetry data to make informed decisions.
+                      </p>
+                      <div className="flex gap-3">
+                        <Button className="bg-white text-purple-600 hover:bg-gray-100 flex items-center gap-2">
+                          🎮 Play Now
+                        </Button>
+                        <div className="text-sm opacity-80 flex items-center gap-3">
+                          <span>Created by DRVN Labs</span>
+                          <span>•</span>
+                          <span>Prediction</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Saved Games Section */}
+                  <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bookmark className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">No Saved Games Yet</h3>
+                    <p className="text-gray-400 max-w-md mx-auto mb-6">
+                      Discover amazing games and bookmark your favorites to create your personal collection.
+                    </p>
+                    <Button
+                      onClick={() => setArcadeTab('games')}
+                      className="bg-[#00daa2] text-black hover:bg-[#00c49a]"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Browse All Games
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {arcadeTab === 'games' && (
+                <div className="space-y-6">
+                  {/* Search and Filter Bar */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search games..."
+                          className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:border-[#00daa2] focus:outline-none"
+                        />
+                        <div className="absolute left-3 top-3.5">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        <Bookmark className="w-4 h-4" />
+                        Show Bookmarked Only
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Game Categories */}
+                  <div className="flex flex-wrap gap-2">
+                    {['All', 'Prediction', 'Skill', 'Strategy', 'Racing', 'Puzzle', 'Social'].map((category) => (
+                      <button
+                        key={category}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                          category === 'All'
+                            ? 'border-[#00daa2] bg-[#00daa2] text-black'
+                            : 'border-gray-700 text-gray-400 hover:text-white hover:border-[#00daa2]'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Games Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {[
+                      { id: '1', title: 'F1 Race Predictor', icon: '🏁', category: 'Prediction', plays: '1.2K', description: 'Predict race winners and podium finishes' },
+                      { id: '2', title: 'Reaction Challenge', icon: '⚡', category: 'Skill', plays: '850', description: 'Test your lightning-fast reflexes' },
+                      { id: '3', title: 'Tuner Shop Tycoon', icon: '🔧', category: 'Strategy', plays: '2.1K', description: 'Build and manage your dream garage' },
+                      { id: '4', title: 'Pit Stop Challenge', icon: '🏎️', category: 'Skill', plays: '645', description: 'Complete pit stops as fast as possible' },
+                      { id: '5', title: 'Track Master', icon: '🏆', category: 'Puzzle', plays: '423', description: 'Learn famous racing circuits' },
+                      { id: '6', title: 'Drift King', icon: '💨', category: 'Racing', plays: '891', description: 'Master the art of drifting' },
+                      { id: '7', title: 'Engine Builder', icon: '🔩', category: 'Strategy', plays: '567', description: 'Assemble high-performance engines' },
+                      { id: '8', title: 'Checkpoint Rush', icon: '🎯', category: 'Racing', plays: '734', description: 'Race against time through checkpoints' },
+                    ].map((game) => (
+                      <div key={game.id} className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-[#00daa2] transition-all duration-200 cursor-pointer group">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-3xl">{game.icon}</div>
+                          <button className="text-gray-400 hover:text-[#00daa2] transition-colors">
+                            <Bookmark className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <h3 className="text-white font-bold mb-2 group-hover:text-[#00daa2] transition-colors">{game.title}</h3>
+                        <p className="text-gray-400 text-sm mb-3 line-clamp-2">{game.description}</p>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="bg-gray-800 text-gray-300 px-2 py-1 rounded">{game.category}</span>
+                          <span className="text-gray-400">{game.plays} plays</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {arcadeTab === 'stats' && (
+                <div className="space-y-6">
+                  {/* Stats Overview Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                      { title: 'Total Games Played', value: '42', icon: '🎮', color: 'from-blue-500 to-blue-600' },
+                      { title: 'XP Earned', value: '12,450', icon: '⭐', color: 'from-yellow-500 to-yellow-600' },
+                      { title: 'Achievements', value: '8/15', icon: '🏆', color: 'from-green-500 to-green-600' },
+                      { title: 'Rank', value: '#247', icon: '📊', color: 'from-purple-500 to-purple-600' },
+                    ].map((stat, index) => (
+                      <div key={index} className={`bg-gradient-to-r ${stat.color} rounded-lg p-4 text-white`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-2xl">{stat.icon}</span>
+                          <span className="text-2xl font-bold">{stat.value}</span>
+                        </div>
+                        <p className="text-sm opacity-90">{stat.title}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Detailed Stats */}
+                  <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BarChart className="w-8 h-8 text-[#00daa2]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Detailed Statistics</h3>
+                    <p className="text-gray-400 mb-6">
+                      Track your gaming performance, achievements, and progress across all arcade games.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          window.open('/arcade/stats', '_blank');
+                        }
+                      }}
+                      variant="outline"
+                      className="border-gray-600 text-gray-400 hover:text-white hover:border-[#00daa2]"
+                    >
+                      View Full Stats
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
