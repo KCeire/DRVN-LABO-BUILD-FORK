@@ -850,12 +850,6 @@ export function DRVNDashboard() {
         // Render full arcade interface within main app context
         return (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-white font-mono flex items-center gap-2">
-                <Gamepad2 className="w-6 h-6 text-[#00daa2]" />
-                Arcade
-              </h1>
-            </div>
 
             {/* Desktop Navigation Bar */}
             <div className="hidden md:flex border-b border-gray-800 bg-gray-950 -mx-6 px-6 py-0 mb-6">
@@ -1150,8 +1144,8 @@ export function DRVNDashboard() {
                         <Plus className="w-8 h-8 text-white" />
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold font-mono">Workshop</h1>
-                    <p className="text-gray-400">
+                    <h1 className="text-3xl font-bold font-mono text-white">Workshop</h1>
+                    <p className="text-gray-200">
                       Craft unique assets by combining tokens and NFTs
                     </p>
                     <div className="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-semibold">
@@ -1159,13 +1153,13 @@ export function DRVNDashboard() {
                     </div>
                   </div>
                   <div className="bg-gray-900 rounded-lg p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-4">How It Works</h2>
-                    <p className="text-gray-300 mb-4">
-                      The Workshop uses the <strong>RYFT wrapping system</strong> to let you combine
+                    <h2 className="text-2xl font-bold mb-4 text-white">How It Works</h2>
+                    <p className="text-gray-100 mb-4">
+                      The Workshop uses the <strong className="text-white">RYFT wrapping system</strong> to let you combine
                       DRVN ecosystem tokens and NFTs into new, exclusive assets.
                     </p>
-                    <p className="text-gray-300 mb-4">
-                      Think of it like a <strong>Minecraft crafting table</strong> - combine the right
+                    <p className="text-gray-100 mb-4">
+                      Think of it like a <strong className="text-white">Minecraft crafting table</strong> - combine the right
                       ingredients to unlock rare items, special abilities, and exclusive rewards!
                     </p>
                   </div>
@@ -1180,8 +1174,8 @@ export function DRVNDashboard() {
                         <Plus className="w-8 h-8 text-white" />
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold font-mono">Submit Your Game</h1>
-                    <p className="text-gray-400">
+                    <h1 className="text-3xl font-bold font-mono text-white">Submit Your Game</h1>
+                    <p className="text-gray-200">
                       Built something awesome? Share it with the DRVN community
                     </p>
                     <div className="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-semibold">
@@ -1189,12 +1183,12 @@ export function DRVNDashboard() {
                     </div>
                   </div>
                   <div className="bg-gray-900 rounded-lg p-8">
-                    <h2 className="text-2xl font-bold mb-4">Developer Program</h2>
-                    <p className="text-gray-300 mb-4">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Developer Program</h2>
+                    <p className="text-gray-100 mb-4">
                       DRVN Arcade welcomes games from talented developers. Whether you built your game
-                      with <strong>OharaAI</strong> or your own code, we want to feature it.
+                      with <strong className="text-white">OharaAI</strong> or your own code, we want to feature it.
                     </p>
-                    <p className="text-gray-300">
+                    <p className="text-gray-100">
                       Games earn revenue from transaction fees and in-game assets, with splits
                       benefiting both DRVN and developers.
                     </p>
@@ -1733,19 +1727,22 @@ export function DRVNDashboard() {
                 XP / coming soon
               </div>
 
-              {/* Mobile Menu/Arcade Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white border border-[#8351a1] md:hidden"
-                onClick={activePage === "arcade" ? () => setActivePage('dashboard') : toggleMobileMenu}
-              >
-                {activePage === "arcade" ? (
-                  <Gamepad2 className="h-5 w-7 text-[#00daa2]" />
-                ) : (
+              {/* Mobile Menu/Arcade Header */}
+              {activePage === "arcade" ? (
+                <div className="flex items-center gap-2 md:hidden">
+                  <Gamepad2 className="w-5 h-5 text-[#00daa2]" />
+                  <span className="text-white font-mono font-bold">Arcade</span>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white border border-[#8351a1] md:hidden"
+                  onClick={toggleMobileMenu}
+                >
                   <Menu className="h-5 w-7" />
-                )}
-              </Button>
+                </Button>
+              )}
             </div>
           </header>
 
