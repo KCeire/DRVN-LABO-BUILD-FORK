@@ -381,6 +381,14 @@ export function DRVNDashboard() {
     });
   };
 
+  const handleArcadeTabChange = (tabId: string) => {
+    setArcadeTab(tabId);
+    // Scroll to top when changing tabs
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const navigationItems = [
     {
       icon: BsSpeedometer2,
@@ -913,7 +921,7 @@ export function DRVNDashboard() {
                   ].map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => setArcadeTab(item.id)}
+                      onClick={() => handleArcadeTabChange(item.id)}
                       className={`px-4 py-4 text-sm font-medium transition-colors border-b-2 border-transparent flex items-center gap-2 ${
                         arcadeTab === item.id
                           ? 'text-[#00daa2] border-[#00daa2] bg-gray-900/50'
@@ -1026,7 +1034,7 @@ export function DRVNDashboard() {
                       </h3>
                       {bookmarkedGames.size > 0 && (
                         <Button
-                          onClick={() => setArcadeTab('games')}
+                          onClick={() => handleArcadeTabChange('games')}
                           variant="outline"
                           size="sm"
                           className="border-gray-600 text-gray-400 hover:text-white"
@@ -1046,7 +1054,7 @@ export function DRVNDashboard() {
                           Discover amazing games and bookmark your favorites to create your personal collection.
                         </p>
                         <Button
-                          onClick={() => setArcadeTab('games')}
+                          onClick={() => handleArcadeTabChange('games')}
                           className="bg-[#00daa2] text-black hover:bg-[#00c49a]"
                         >
                           <Plus className="w-5 h-5 mr-2" />
@@ -1634,7 +1642,7 @@ export function DRVNDashboard() {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => setArcadeTab(item.id)}
+                      onClick={() => handleArcadeTabChange(item.id)}
                       className={cn(
                         'flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors',
                         isActive
