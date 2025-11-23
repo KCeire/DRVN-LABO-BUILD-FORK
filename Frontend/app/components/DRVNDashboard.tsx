@@ -1571,7 +1571,7 @@ export function DRVNDashboard() {
                       Submission Requirements (Preview)
                     </h3>
                     <ul className="space-y-2 text-sm text-gray-100">
-                      <li>✓ Game must integrate with user's Base wallet</li>
+                      <li>✓ Game must integrate with user&apos;s Base wallet</li>
                       <li>✓ XP and achievement system integration</li>
                       <li>✓ Revenue sharing smart contract compliance</li>
                       <li>✓ Testing and quality assurance</li>
@@ -1587,7 +1587,7 @@ export function DRVNDashboard() {
                   <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg p-8 text-white text-center">
                     <h3 className="text-2xl font-bold mb-4">Interested?</h3>
                     <p className="mb-6">
-                      Leave your email and game details. We'll reach out when submissions open!
+                      Leave your email and game details. We&apos;ll reach out when submissions open!
                     </p>
                     <button
                       className="bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg opacity-50 cursor-not-allowed"
