@@ -31,6 +31,7 @@ import {
   Code,
   DollarSign,
   Trophy,
+  BarChart3,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -913,22 +914,22 @@ export function DRVNDashboard() {
                 {/* Navigation Items */}
                 <div className="flex space-x-1">
                   {[
-                    { label: 'Dashboard', id: 'dashboard', icon: '🏠' },
-                    { label: 'Games', id: 'games', icon: '🎮' },
-                    { label: 'Stats', id: 'stats', icon: '📊' },
-                    { label: 'Workshop', id: 'workshop', icon: '🔧' },
-                    { label: 'Submit', id: 'submit', icon: '📤' },
+                    { label: 'Dashboard', id: 'dashboard', icon: Home },
+                    { label: 'Games', id: 'games', icon: Gamepad2 },
+                    { label: 'Stats', id: 'stats', icon: BarChart3 },
+                    { label: 'Workshop', id: 'workshop', icon: Wrench },
+                    { label: 'Submit', id: 'submit', icon: Upload },
                   ].map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleArcadeTabChange(item.id)}
-                      className={`px-4 py-4 text-sm font-medium transition-colors border-b-2 border-transparent flex items-center gap-2 ${
+                      className={`px-4 py-4 text-sm font-mono font-semibold transition-colors border-b-2 border-transparent flex items-center gap-2 ${
                         arcadeTab === item.id
-                          ? 'text-[#00daa2] border-[#00daa2] bg-gray-900/50'
-                          : 'text-gray-400 hover:text-white hover:border-gray-600'
+                          ? 'text-[#00daa2] border-[#00daa2] bg-gray-800'
+                          : 'text-[#00daa2] hover:bg-gray-800'
                       }`}
                     >
-                      <span className="text-base">{item.icon}</span>
+                      <item.icon className="w-4 h-4 text-[#00daa2]" />
                       {item.label}
                     </button>
                   ))}
