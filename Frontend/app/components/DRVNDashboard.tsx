@@ -1032,7 +1032,10 @@ export function DRVNDashboard() {
                         <Button
                           onClick={() => {
                             const featuredGame = PLACEHOLDER_GAMES.find(g => g.featured);
-                            if (featuredGame) handleGameClick(featuredGame);
+                            if (featuredGame) {
+                              console.log('Featured game clicked:', featuredGame);
+                              alert(`🎮 Featured game "${featuredGame.title}" clicked!\n\nModal functionality temporarily disabled.`);
+                            }
                           }}
                           className="bg-white text-purple-600 hover:bg-gray-100 flex items-center gap-2"
                         >
@@ -1115,7 +1118,10 @@ export function DRVNDashboard() {
                     {PLACEHOLDER_GAMES.map((game) => (
                       <div
                         key={game.id}
-                        onClick={() => handleGameClick(game)}
+                        onClick={() => {
+                          console.log('Game clicked:', game);
+                          alert(`🎮 Game "${game.title}" clicked!\n\nModal functionality temporarily disabled.`);
+                        }}
                         className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-[#00daa2] transition-all duration-200 cursor-pointer group"
                       >
                         <div className="flex items-center justify-between mb-3">
