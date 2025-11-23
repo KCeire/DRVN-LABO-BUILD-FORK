@@ -20,6 +20,12 @@ import {
   Bookmark,
   Plus,
   BarChart,
+  ArrowLeft,
+  Home,
+  Wrench,
+  Upload,
+  Star,
+  Play,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -47,6 +53,9 @@ import { ProgressiveActionButton } from "./ProgressiveActionButton";
 import { ConnectButton } from "./web3/ConnectButton";
 import TotalKeysMinted from "./web3/TotalKeysMinted";
 import { HeroHeader } from "./ui/hero-header";
+import type { Game, PlayerStats } from "../arcade/types";
+import GameInfoModal from "../arcade/components/GameInfoModal";
+import { cn } from "../../lib/utils";
 
 export function DRVNDashboard() {
   const { address } = useAccount();
@@ -57,6 +66,9 @@ export function DRVNDashboard() {
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
   const [activePage, setActivePage] = useState("dashboard");
   const [arcadeTab, setArcadeTab] = useState("dashboard");
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [bookmarkedGames, setBookmarkedGames] = useState<Set<string>>(new Set());
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -202,6 +214,131 @@ export function DRVNDashboard() {
   const handleAuthClick = () => {
     setShowAuthModal(true);
     setMobileMenuOpen(false); // Close mobile menu when opening auth modal
+  };
+
+  // Placeholder data for arcade functionality
+  const PLACEHOLDER_GAMES: Game[] = [
+    {
+      id: '1',
+      title: 'F1 Race Predictor',
+      icon: '🏁',
+      description: 'Predict race winners and podium finishes',
+      longDescription: 'Test your F1 knowledge by predicting race outcomes. Earn XP and BSTR rewards for accurate predictions! Use real-time telemetry data to make informed decisions.',
+      plays: '1.2K',
+      category: 'Prediction',
+      featured: true,
+      developer: 'DRVN Labs',
+      releasedAt: '2024-11-01',
+    },
+    {
+      id: '2',
+      title: 'Reaction Challenge',
+      icon: '⚡',
+      description: 'Test your lightning-fast reflexes',
+      longDescription: 'How fast are your reflexes? Test your reaction time with this addictive skill game. Compete for the fastest times on the global leaderboard.',
+      plays: '850',
+      category: 'Skill',
+      developer: 'DRVN Community',
+      releasedAt: '2024-10-15',
+    },
+    {
+      id: '3',
+      title: 'Tuner Shop Tycoon',
+      icon: '🔧',
+      description: 'Build and manage your car tuning empire',
+      longDescription: 'Start with a small garage and grow it into a tuning empire. Upgrade cars, satisfy customers, and compete in the marketplace.',
+      plays: '2.1K',
+      category: 'Strategy',
+      developer: 'DRVN Labs',
+      releasedAt: '2024-09-20',
+    },
+    {
+      id: '4',
+      title: 'Drift King',
+      icon: '🏎️',
+      description: 'Master the art of drifting',
+      longDescription: 'Experience the thrill of drifting with realistic physics. Master different tracks and compete for the highest drift scores.',
+      plays: '980',
+      category: 'Racing',
+      developer: 'Speed Studios',
+      releasedAt: '2024-10-01',
+    },
+    {
+      id: '5',
+      title: 'Engine Puzzle',
+      icon: '🧩',
+      description: 'Solve mechanical puzzles',
+      longDescription: 'Test your mechanical knowledge by solving complex engine puzzles. Learn about car parts while having fun!',
+      plays: '650',
+      category: 'Puzzle',
+      developer: 'Edu Games',
+      releasedAt: '2024-08-12',
+    },
+    {
+      id: '6',
+      title: 'Garage Stories',
+      icon: '👥',
+      description: 'Share your builds and connect',
+      longDescription: 'Show off your car builds and connect with other enthusiasts. Rate builds, share tips, and discover new inspiration.',
+      plays: '1.5K',
+      category: 'Social',
+      developer: 'Community Hub',
+      releasedAt: '2024-10-30',
+    },
+    {
+      id: '7',
+      title: 'Track Master',
+      icon: '🏁',
+      description: 'Design and race on custom tracks',
+      longDescription: 'Create your own racing tracks and challenge the community. Use the track editor to build complex circuits.',
+      plays: '720',
+      category: 'Strategy',
+      developer: 'Track Labs',
+      releasedAt: '2024-11-05',
+    },
+    {
+      id: '8',
+      title: 'Nitro Rush',
+      icon: '💨',
+      description: 'High-speed arcade racing',
+      longDescription: 'Fast-paced arcade racing with power-ups and nitro boosts. Race through dynamic tracks with changing weather.',
+      plays: '1.8K',
+      category: 'Racing',
+      developer: 'Rush Games',
+      releasedAt: '2024-09-15',
+    },
+  ];
+
+  const PLACEHOLDER_STATS: PlayerStats = {
+    level: 12,
+    xp: 2450,
+    nextLevelXp: 3000,
+    totalXpEarned: 12450,
+    totalAchievements: 15,
+    unlockedAchievements: 8,
+  };
+
+  // Arcade functionality
+  const handleGameClick = (game: Game) => {
+    setSelectedGame(game);
+    setModalOpen(true);
+  };
+
+  const handleGameLaunch = (gameId: string) => {
+    console.log('Launching game:', gameId);
+    alert(`🎮 Game "${selectedGame?.title}" would launch here!\n\nIn the full version, this would open the actual game.`);
+  };
+
+  const handleBookmarkToggle = (gameId: string) => {
+    setBookmarkedGames((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(gameId)) {
+        newSet.delete(gameId);
+      } else {
+        newSet.add(gameId);
+      }
+      return newSet;
+    });
   };
 
   const navigationItems = [
@@ -834,7 +971,7 @@ export function DRVNDashboard() {
             </div>
 
             {/* Arcade Content */}
-            <div className="min-h-[600px]">
+            <div className="min-h-[600px] pb-20 md:pb-0">
               {arcadeTab === 'dashboard' && (
                 <div className="space-y-6">
                   {/* Player Stats Widget */}
@@ -855,29 +992,32 @@ export function DRVNDashboard() {
                         <div className="bg-white text-blue-600 rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
                           <div className="text-center">
                             <p className="text-xs font-semibold">LEVEL</p>
-                            <p className="text-2xl font-bold">12</p>
+                            <p className="text-2xl font-bold">{PLACEHOLDER_STATS.level}</p>
                           </div>
                         </div>
                       </div>
 
                       <div className="mb-4">
                         <div className="flex justify-between text-sm mb-2">
-                          <span className="font-mono">2,450 XP</span>
-                          <span className="font-mono">3,000 XP</span>
+                          <span className="font-mono">{PLACEHOLDER_STATS.xp} XP</span>
+                          <span className="font-mono">{PLACEHOLDER_STATS.nextLevelXp} XP</span>
                         </div>
                         <div className="w-full bg-white/20 rounded-full h-3">
-                          <div className="bg-white rounded-full h-3" style={{ width: '82%' }}></div>
+                          <div
+                            className="bg-white rounded-full h-3"
+                            style={{ width: `${(PLACEHOLDER_STATS.xp / PLACEHOLDER_STATS.nextLevelXp) * 100}%` }}
+                          ></div>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
                           <span>🏆</span>
-                          <span>8 / 15 Achievements</span>
+                          <span>{PLACEHOLDER_STATS.unlockedAchievements} / {PLACEHOLDER_STATS.totalAchievements} Achievements</span>
                         </div>
                         <div className="text-right">
                           <span className="opacity-80">Total: </span>
-                          <span className="font-mono font-bold">12,450 XP</span>
+                          <span className="font-mono font-bold">{PLACEHOLDER_STATS.totalXpEarned} XP</span>
                         </div>
                       </div>
                     </div>
@@ -899,8 +1039,15 @@ export function DRVNDashboard() {
                         Test your F1 knowledge by predicting race outcomes. Earn XP and BSTR rewards for accurate predictions! Use real-time telemetry data to make informed decisions.
                       </p>
                       <div className="flex gap-3">
-                        <Button className="bg-white text-purple-600 hover:bg-gray-100 flex items-center gap-2">
-                          🎮 Play Now
+                        <Button
+                          onClick={() => {
+                            const featuredGame = PLACEHOLDER_GAMES.find(g => g.featured);
+                            if (featuredGame) handleGameClick(featuredGame);
+                          }}
+                          className="bg-white text-purple-600 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          <Play className="w-4 h-4" />
+                          Play Now
                         </Button>
                         <div className="text-sm opacity-80 flex items-center gap-3">
                           <span>Created by DRVN Labs</span>
@@ -975,27 +1122,41 @@ export function DRVNDashboard() {
 
                   {/* Games Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {[
-                      { id: '1', title: 'F1 Race Predictor', icon: '🏁', category: 'Prediction', plays: '1.2K', description: 'Predict race winners and podium finishes' },
-                      { id: '2', title: 'Reaction Challenge', icon: '⚡', category: 'Skill', plays: '850', description: 'Test your lightning-fast reflexes' },
-                      { id: '3', title: 'Tuner Shop Tycoon', icon: '🔧', category: 'Strategy', plays: '2.1K', description: 'Build and manage your dream garage' },
-                      { id: '4', title: 'Pit Stop Challenge', icon: '🏎️', category: 'Skill', plays: '645', description: 'Complete pit stops as fast as possible' },
-                      { id: '5', title: 'Track Master', icon: '🏆', category: 'Puzzle', plays: '423', description: 'Learn famous racing circuits' },
-                      { id: '6', title: 'Drift King', icon: '💨', category: 'Racing', plays: '891', description: 'Master the art of drifting' },
-                      { id: '7', title: 'Engine Builder', icon: '🔩', category: 'Strategy', plays: '567', description: 'Assemble high-performance engines' },
-                      { id: '8', title: 'Checkpoint Rush', icon: '🎯', category: 'Racing', plays: '734', description: 'Race against time through checkpoints' },
-                    ].map((game) => (
-                      <div key={game.id} className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-[#00daa2] transition-all duration-200 cursor-pointer group">
+                    {PLACEHOLDER_GAMES.map((game) => (
+                      <div
+                        key={game.id}
+                        onClick={() => handleGameClick(game)}
+                        className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-[#00daa2] transition-all duration-200 cursor-pointer group"
+                      >
                         <div className="flex items-center justify-between mb-3">
                           <div className="text-3xl">{game.icon}</div>
-                          <button className="text-gray-400 hover:text-[#00daa2] transition-colors">
-                            <Bookmark className="w-5 h-5" />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBookmarkToggle(game.id);
+                            }}
+                            className={cn(
+                              "transition-colors",
+                              bookmarkedGames.has(game.id)
+                                ? "text-yellow-500 hover:text-yellow-400"
+                                : "text-gray-400 hover:text-[#00daa2]"
+                            )}
+                          >
+                            <Star className={cn("w-5 h-5", bookmarkedGames.has(game.id) && "fill-current")} />
                           </button>
                         </div>
                         <h3 className="text-white font-bold mb-2 group-hover:text-[#00daa2] transition-colors">{game.title}</h3>
                         <p className="text-gray-400 text-sm mb-3 line-clamp-2">{game.description}</p>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="bg-gray-800 text-gray-300 px-2 py-1 rounded">{game.category}</span>
+                          <span className={cn(
+                            'px-2 py-1 rounded text-xs font-medium',
+                            game.category === 'Prediction' && 'bg-blue-900/30 text-blue-400',
+                            game.category === 'Skill' && 'bg-green-900/30 text-green-400',
+                            game.category === 'Strategy' && 'bg-purple-900/30 text-purple-400',
+                            game.category === 'Racing' && 'bg-red-900/30 text-red-400',
+                            game.category === 'Puzzle' && 'bg-yellow-900/30 text-yellow-400',
+                            game.category === 'Social' && 'bg-pink-900/30 text-pink-400'
+                          )}>{game.category}</span>
                           <span className="text-gray-400">{game.plays} plays</span>
                         </div>
                       </div>
@@ -1108,6 +1269,57 @@ export function DRVNDashboard() {
                 </div>
               )}
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 z-50">
+              <div className="grid grid-cols-6 h-16">
+                {/* Back Button */}
+                <button
+                  onClick={() => setActivePage('dashboard')}
+                  className="flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors text-gray-400 hover:text-white"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="text-xs truncate">Back</span>
+                </button>
+
+                {/* Arcade Navigation Items */}
+                {[
+                  { label: 'Dashboard', id: 'dashboard', icon: Home },
+                  { label: 'Games', id: 'games', icon: Gamepad2 },
+                  { label: 'Stats', id: 'stats', icon: BarChart },
+                  { label: 'Workshop', id: 'workshop', icon: Wrench },
+                  { label: 'Submit', id: 'submit', icon: Upload },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = arcadeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setArcadeTab(item.id)}
+                      className={cn(
+                        'flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors',
+                        isActive
+                          ? 'text-[#00daa2] bg-gray-800'
+                          : 'text-gray-400 hover:text-white'
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-xs truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
+
+            {/* Game Info Modal */}
+            <GameInfoModal
+              game={selectedGame}
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              onLaunch={handleGameLaunch}
+              onBookmarkToggle={handleBookmarkToggle}
+              bookmarked={selectedGame ? bookmarkedGames.has(selectedGame.id) : false}
+            />
           </div>
         );
 
