@@ -319,16 +319,6 @@ export function DRVNDashboard() {
   };
 
   // Arcade functionality
-  const handleGameClick = (game: Game) => {
-    setSelectedGame(game);
-    setModalOpen(true);
-  };
-
-  const handleGameLaunch = (gameId: string) => {
-    console.log('Launching game:', gameId);
-    alert(`🎮 Game "${selectedGame?.title}" would launch here!\n\nIn the full version, this would open the actual game.`);
-  };
-
   const handleBookmarkToggle = (gameId: string) => {
     setBookmarkedGames((prev) => {
       const newSet = new Set(prev);
