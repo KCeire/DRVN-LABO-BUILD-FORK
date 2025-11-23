@@ -734,11 +734,56 @@ export function DRVNDashboard() {
               </div>
             </div>
 
-            {/* Arcade Navigation Tabs */}
-            <div className="flex space-x-1 bg-gray-900/50 border border-gray-800 rounded-lg p-1">
+            {/* Desktop Navigation Bar */}
+            <div className="hidden md:flex border-b border-gray-800 bg-gray-950 -mx-6 px-6 py-0 mb-6">
+              <div className="flex items-center space-x-8 w-full">
+                {/* Return to Main App Button */}
+                <button
+                  onClick={() => setActivePage('dashboard')}
+                  className="flex items-center gap-2 py-4 px-3 text-gray-400 hover:text-white transition-colors"
+                  title="Return to main app"
+                >
+                  <Plus className="w-5 h-5 rotate-45" />
+                  <span className="text-sm">Back</span>
+                </button>
+
+                {/* Arcade Title */}
+                <div className="py-4">
+                  <h1 className="text-lg font-bold font-mono text-[#00daa2]">
+                    🎮 ARCADE
+                  </h1>
+                </div>
+
+                {/* Navigation Items */}
+                <div className="flex space-x-1">
+                  {[
+                    { label: 'Dashboard', id: 'dashboard' },
+                    { label: 'Games', id: 'games' },
+                    { label: 'Stats', id: 'stats' },
+                    { label: 'Workshop', id: 'workshop' },
+                    { label: 'Submit', id: 'submit' },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setArcadeTab(item.id)}
+                      className={`px-4 py-4 text-sm font-medium transition-colors border-b-2 border-transparent ${
+                        arcadeTab === item.id
+                          ? 'text-[#00daa2] border-[#00daa2] bg-gray-900/50'
+                          : 'text-gray-400 hover:text-white hover:border-gray-600'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Navigation Tabs */}
+            <div className="flex md:hidden space-x-1 bg-gray-900/50 border border-gray-800 rounded-lg p-1 mb-6">
               <button
                 onClick={() => setArcadeTab('dashboard')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   arcadeTab === 'dashboard'
                     ? 'bg-[#00daa2] text-black'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
@@ -748,7 +793,7 @@ export function DRVNDashboard() {
               </button>
               <button
                 onClick={() => setArcadeTab('games')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   arcadeTab === 'games'
                     ? 'bg-[#00daa2] text-black'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
@@ -758,13 +803,33 @@ export function DRVNDashboard() {
               </button>
               <button
                 onClick={() => setArcadeTab('stats')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   arcadeTab === 'stats'
                     ? 'bg-[#00daa2] text-black'
                     : 'text-gray-400 hover:text-white hover:bg-gray-800'
                 }`}
               >
                 Stats
+              </button>
+              <button
+                onClick={() => setArcadeTab('workshop')}
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                  arcadeTab === 'workshop'
+                    ? 'bg-[#00daa2] text-black'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Workshop
+              </button>
+              <button
+                onClick={() => setArcadeTab('submit')}
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                  arcadeTab === 'submit'
+                    ? 'bg-[#00daa2] text-black'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Submit
               </button>
             </div>
 
@@ -979,6 +1044,66 @@ export function DRVNDashboard() {
                     >
                       View Full Stats
                     </Button>
+                  </div>
+                </div>
+              )}
+
+              {arcadeTab === 'workshop' && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                        <Plus className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <h1 className="text-3xl font-bold font-mono">Workshop</h1>
+                    <p className="text-gray-400">
+                      Craft unique assets by combining tokens and NFTs
+                    </p>
+                    <div className="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-semibold">
+                      Coming Soon
+                    </div>
+                  </div>
+                  <div className="bg-gray-900 rounded-lg p-8 text-center">
+                    <h2 className="text-2xl font-bold mb-4">How It Works</h2>
+                    <p className="text-gray-300 mb-4">
+                      The Workshop uses the <strong>RYFT wrapping system</strong> to let you combine
+                      DRVN ecosystem tokens and NFTs into new, exclusive assets.
+                    </p>
+                    <p className="text-gray-300 mb-4">
+                      Think of it like a <strong>Minecraft crafting table</strong> - combine the right
+                      ingredients to unlock rare items, special abilities, and exclusive rewards!
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {arcadeTab === 'submit' && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <Plus className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <h1 className="text-3xl font-bold font-mono">Submit Your Game</h1>
+                    <p className="text-gray-400">
+                      Built something awesome? Share it with the DRVN community
+                    </p>
+                    <div className="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-semibold">
+                      Coming Soon
+                    </div>
+                  </div>
+                  <div className="bg-gray-900 rounded-lg p-8">
+                    <h2 className="text-2xl font-bold mb-4">Developer Program</h2>
+                    <p className="text-gray-300 mb-4">
+                      DRVN Arcade welcomes games from talented developers. Whether you built your game
+                      with <strong>OharaAI</strong> or your own code, we want to feature it.
+                    </p>
+                    <p className="text-gray-300">
+                      Games earn revenue from transaction fees and in-game assets, with splits
+                      benefiting both DRVN and developers.
+                    </p>
                   </div>
                 </div>
               )}
