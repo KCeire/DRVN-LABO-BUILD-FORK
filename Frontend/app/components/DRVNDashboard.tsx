@@ -154,6 +154,13 @@ export function DRVNDashboard() {
     }
   }, [activePage]);
 
+  // Scroll to top when arcade tab changes (React effect for better timing)
+  useEffect(() => {
+    if (activePage === 'arcade') {
+      scrollToTop();
+    }
+  }, [arcadeTab, activePage]);
+
   // Handle mobile menu swipe to close
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -384,8 +391,34 @@ export function DRVNDashboard() {
 
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {
-      // Multiple methods to ensure mobile compatibility
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Find scrollable elements and scroll them to top
+      const scrollableSelectors = [
+        '.overflow-auto',
+        '.overflow-y-auto',
+        '.overflow-scroll',
+        '.overflow-y-scroll',
+        'main',
+        '.min-h-screen',
+        '.space-y-6'
+      ];
+
+      // Check each possible scrollable container
+      scrollableSelectors.forEach((selector) => {
+        try {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach((element) => {
+            if (element instanceof HTMLElement && element.scrollTop > 0) {
+              element.scrollTo(0, 0);
+              element.scrollTop = 0;
+            }
+          });
+        } catch {
+          // Silently continue if selector fails
+        }
+      });
+
+      // Standard scroll methods as fallback
+      window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
     }
@@ -394,20 +427,17 @@ export function DRVNDashboard() {
   const handleArcadeTabChange = (tabId: string) => {
     setArcadeTab(tabId);
 
-    // Enhanced scroll-to-top for mobile compatibility
+    // Scroll to top when changing tabs
     if (typeof window !== 'undefined') {
       // Immediate scroll attempt
       scrollToTop();
 
-      // Use requestAnimationFrame for smooth execution after render
+      // Additional attempts for reliable scrolling
       requestAnimationFrame(() => {
-        scrollToTop();
-
-        // Additional backup after content likely rendered
-        setTimeout(() => {
-          scrollToTop();
-        }, 100);
+        setTimeout(() => scrollToTop(), 10);
       });
+
+      setTimeout(() => scrollToTop(), 50);
     }
   };
 
