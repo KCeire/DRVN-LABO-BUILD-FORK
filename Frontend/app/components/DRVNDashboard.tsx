@@ -382,11 +382,32 @@ export function DRVNDashboard() {
     });
   };
 
+  const scrollToTop = () => {
+    if (typeof window !== 'undefined') {
+      // Multiple methods to ensure mobile compatibility
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  };
+
   const handleArcadeTabChange = (tabId: string) => {
     setArcadeTab(tabId);
-    // Scroll to top when changing tabs
+
+    // Enhanced scroll-to-top for mobile compatibility
     if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Immediate scroll attempt
+      scrollToTop();
+
+      // Use requestAnimationFrame for smooth execution after render
+      requestAnimationFrame(() => {
+        scrollToTop();
+
+        // Additional backup after content likely rendered
+        setTimeout(() => {
+          scrollToTop();
+        }, 100);
+      });
     }
   };
 
