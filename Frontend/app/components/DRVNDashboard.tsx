@@ -76,6 +76,7 @@ export function DRVNDashboard() {
   const [bookmarkedGames, setBookmarkedGames] = useState<Set<string>>(new Set());
   const [leaderboardView, setLeaderboardView] = useState<'global' | 'byGame'>('global');
   const [selectedGameLeaderboard, setSelectedGameLeaderboard] = useState<string>('1');
+  const [hasAutoCollapsedForArcade, setHasAutoCollapsedForArcade] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -144,6 +145,13 @@ export function DRVNDashboard() {
       }
     }
   }, []);
+
+  // Reset auto-collapse flag when leaving arcade
+  useEffect(() => {
+    if (activePage !== 'arcade') {
+      setHasAutoCollapsedForArcade(false);
+    }
+  }, [activePage]);
 
   // Handle mobile menu swipe to close
   useEffect(() => {
@@ -874,9 +882,10 @@ export function DRVNDashboard() {
         );
 
       case "arcade":
-        // Auto-collapse sidebar for better arcade experience
-        if (!sidebarCollapsed) {
+        // Auto-collapse sidebar for better arcade experience (only once)
+        if (!sidebarCollapsed && !hasAutoCollapsedForArcade) {
           setSidebarCollapsed(true);
+          setHasAutoCollapsedForArcade(true);
         }
 
         // Render full arcade interface within main app context
