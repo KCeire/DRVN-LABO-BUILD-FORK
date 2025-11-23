@@ -123,6 +123,21 @@ export function DRVNDashboard() {
   //   // Pull-to-refresh prevention disabled for testing
   // }, []);
 
+  // Load bookmarked games from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('drvn-bookmarked-games');
+      if (saved) {
+        try {
+          const bookmarkArray = JSON.parse(saved);
+          setBookmarkedGames(new Set(bookmarkArray));
+        } catch (error) {
+          console.error('Error loading bookmarked games:', error);
+        }
+      }
+    }
+  }, []);
+
   // Handle mobile menu swipe to close
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -337,6 +352,16 @@ export function DRVNDashboard() {
       } else {
         newSet.add(gameId);
       }
+
+      // Persist to localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('drvn-bookmarked-games', JSON.stringify(Array.from(newSet)));
+        } catch (error) {
+          console.error('Error saving bookmarked games:', error);
+        }
+      }
+
       return newSet;
     });
   };
@@ -986,21 +1011,72 @@ export function DRVNDashboard() {
                   </div>
 
                   {/* Saved Games Section */}
-                  <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Bookmark className="w-8 h-8 text-gray-400" />
+                  <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Bookmark className="w-6 h-6 text-[#00daa2]" />
+                        Saved Games
+                      </h3>
+                      {bookmarkedGames.size > 0 && (
+                        <Button
+                          onClick={() => setArcadeTab('games')}
+                          variant="outline"
+                          size="sm"
+                          className="border-gray-600 text-gray-400 hover:text-white"
+                        >
+                          View All
+                        </Button>
+                      )}
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">No Saved Games Yet</h3>
-                    <p className="text-gray-400 max-w-md mx-auto mb-6">
-                      Discover amazing games and bookmark your favorites to create your personal collection.
-                    </p>
-                    <Button
-                      onClick={() => setArcadeTab('games')}
-                      className="bg-[#00daa2] text-black hover:bg-[#00c49a]"
-                    >
-                      <Plus className="w-5 h-5 mr-2" />
-                      Browse All Games
-                    </Button>
+
+                    {bookmarkedGames.size === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Bookmark className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-white mb-2">No Saved Games Yet</h4>
+                        <p className="text-gray-400 max-w-md mx-auto mb-6">
+                          Discover amazing games and bookmark your favorites to create your personal collection.
+                        </p>
+                        <Button
+                          onClick={() => setArcadeTab('games')}
+                          className="bg-[#00daa2] text-black hover:bg-[#00c49a]"
+                        >
+                          <Plus className="w-5 h-5 mr-2" />
+                          Browse All Games
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {PLACEHOLDER_GAMES.filter(game => bookmarkedGames.has(game.id)).slice(0, 6).map((game) => (
+                          <div
+                            key={game.id}
+                            onClick={() => handleGameClick(game)}
+                            className="bg-gray-800 rounded-lg p-4 hover:border-[#00daa2] border border-gray-700 transition-all duration-200 cursor-pointer group"
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="text-2xl">{game.icon}</div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleBookmarkToggle(game.id);
+                                }}
+                                className="text-[#00daa2] hover:text-white transition-colors"
+                                title="Remove from saved games"
+                              >
+                                <Bookmark className="w-4 h-4 fill-current" />
+                              </button>
+                            </div>
+                            <h4 className="font-bold text-white mb-2 text-sm">{game.title}</h4>
+                            <p className="text-gray-400 text-xs mb-2 line-clamp-2">{game.description}</p>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">{game.plays} plays</span>
+                              <span className="bg-gray-700 px-2 py-1 rounded text-xs">{game.category}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
