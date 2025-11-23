@@ -26,6 +26,11 @@ import {
   Upload,
   Star,
   Play,
+  Package,
+  Sparkles,
+  Code,
+  DollarSign,
+  Trophy,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -69,6 +74,8 @@ export function DRVNDashboard() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [bookmarkedGames, setBookmarkedGames] = useState<Set<string>>(new Set());
+  const [leaderboardView, setLeaderboardView] = useState<'global' | 'byGame'>('global');
+  const [selectedGameLeaderboard, setSelectedGameLeaderboard] = useState<string>('1');
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -899,21 +906,22 @@ export function DRVNDashboard() {
                 {/* Navigation Items */}
                 <div className="flex space-x-1">
                   {[
-                    { label: 'Dashboard', id: 'dashboard' },
-                    { label: 'Games', id: 'games' },
-                    { label: 'Stats', id: 'stats' },
-                    { label: 'Workshop', id: 'workshop' },
-                    { label: 'Submit', id: 'submit' },
+                    { label: 'Dashboard', id: 'dashboard', icon: '🏠' },
+                    { label: 'Games', id: 'games', icon: '🎮' },
+                    { label: 'Stats', id: 'stats', icon: '📊' },
+                    { label: 'Workshop', id: 'workshop', icon: '🔧' },
+                    { label: 'Submit', id: 'submit', icon: '📤' },
                   ].map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setArcadeTab(item.id)}
-                      className={`px-4 py-4 text-sm font-medium transition-colors border-b-2 border-transparent ${
+                      className={`px-4 py-4 text-sm font-medium transition-colors border-b-2 border-transparent flex items-center gap-2 ${
                         arcadeTab === item.id
                           ? 'text-[#00daa2] border-[#00daa2] bg-gray-900/50'
                           : 'text-gray-400 hover:text-white hover:border-gray-600'
                       }`}
                     >
+                      <span className="text-base">{item.icon}</span>
                       {item.label}
                     </button>
                   ))}
@@ -1170,6 +1178,22 @@ export function DRVNDashboard() {
 
               {arcadeTab === 'stats' && (
                 <div className="space-y-6">
+                  {/* Header Section */}
+                  <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                      <div className="w-24 h-24 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center">
+                        <span className="text-4xl">📊</span>
+                      </div>
+                    </div>
+                    <h1 className="text-4xl font-bold font-mono text-white">Player Stats</h1>
+                    <p className="text-xl text-gray-200 font-sans">
+                      Track your progress and achievements
+                    </p>
+                    <div className="inline-block bg-yellow-600 text-black px-6 py-2 rounded-full font-semibold">
+                      Stats Coming Soon
+                    </div>
+                  </div>
+
                   {/* Stats Overview Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
@@ -1188,47 +1212,239 @@ export function DRVNDashboard() {
                     ))}
                   </div>
 
-                  {/* Detailed Stats */}
-                  <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BarChart className="w-8 h-8 text-[#00daa2]" />
+                  {/* Leaderboards */}
+                  <div className="bg-gray-900 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Trophy className="w-6 h-6 text-yellow-500" />
+                        Leaderboards
+                      </h2>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setLeaderboardView('global')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            leaderboardView === 'global'
+                              ? 'bg-[#00daa2] text-black'
+                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          }`}
+                        >
+                          Global
+                        </button>
+                        <button
+                          onClick={() => setLeaderboardView('byGame')}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            leaderboardView === 'byGame'
+                              ? 'bg-[#00daa2] text-black'
+                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          }`}
+                        >
+                          By Game
+                        </button>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Detailed Statistics</h3>
-                    <p className="text-gray-400 mb-6">
-                      Track your gaming performance, achievements, and progress across all arcade games.
-                    </p>
-                    <Button
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          window.open('/arcade/stats', '_blank');
-                        }
-                      }}
-                      variant="outline"
-                      className="border-gray-600 text-gray-400 hover:text-white hover:border-[#00daa2]"
-                    >
-                      View Full Stats
-                    </Button>
+
+                    {leaderboardView === 'global' ? (
+                      /* Global Leaderboard */
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
+                          <span>Rank</span>
+                          <span>Player</span>
+                          <span>Total XP</span>
+                        </div>
+
+                        {/* Top 3 with special styling */}
+                        {[
+                          { rank: 1, name: 'CryptoSpeedster', xp: '24,580', highlight: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
+                          { rank: 2, name: 'RacePredictor', xp: '22,130', highlight: 'bg-gradient-to-r from-gray-400 to-gray-500' },
+                          { rank: 3, name: 'GameMaster2024', xp: '19,750', highlight: 'bg-gradient-to-r from-orange-500 to-orange-600' }
+                        ].map((player) => (
+                          <div key={player.rank} className={`${player.highlight} rounded-lg p-3 text-white flex items-center justify-between`}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">
+                                {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}
+                              </span>
+                              <span className="font-bold">#{player.rank}</span>
+                            </div>
+                            <span className="font-medium">{player.name}</span>
+                            <span className="font-bold">{player.xp} XP</span>
+                          </div>
+                        ))}
+
+                        {/* Current user's position */}
+                        <div className="bg-blue-900/30 border border-blue-600 rounded-lg p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-blue-400 text-xl">🎮</span>
+                            <span className="font-bold text-white">#247</span>
+                          </div>
+                          <span className="text-white font-medium">
+                            {currentUser?.username || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'You')}
+                          </span>
+                          <span className="text-[#00daa2] font-bold">12,450 XP</span>
+                        </div>
+
+                        {/* Other players around user */}
+                        {[
+                          { rank: 248, name: 'DriveKing', xp: '12,440' },
+                          { rank: 249, name: 'SpeedDemon', xp: '12,380' },
+                          { rank: 250, name: 'RaceFanatic', xp: '12,350' }
+                        ].map((player) => (
+                          <div key={player.rank} className="bg-gray-800 rounded-lg p-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-gray-400">📊</span>
+                              <span className="text-gray-300">#{player.rank}</span>
+                            </div>
+                            <span className="text-gray-300">{player.name}</span>
+                            <span className="text-gray-300">{player.xp} XP</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* By Game Leaderboard */
+                      <div className="space-y-4">
+                        {/* Game Selection */}
+                        <div className="mb-4">
+                          <label className="block text-sm text-gray-400 mb-2">Select Game:</label>
+                          <select
+                            value={selectedGameLeaderboard}
+                            onChange={(e) => setSelectedGameLeaderboard(e.target.value)}
+                            className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm min-w-[200px]"
+                          >
+                            {PLACEHOLDER_GAMES.map((game) => (
+                              <option key={game.id} value={game.id}>
+                                {game.icon} {game.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
+                          <span>Rank</span>
+                          <span>Player</span>
+                          <span>Score</span>
+                        </div>
+
+                        {/* Game-specific leaderboard */}
+                        {(() => {
+                          const selectedGameData = PLACEHOLDER_GAMES.find(g => g.id === selectedGameLeaderboard);
+                          const gameLeaderboards = {
+                            '1': [ // F1 Race Predictor
+                              { rank: 1, name: 'RaceOracle', score: '98.5%', highlight: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
+                              { rank: 2, name: 'F1Prophet', score: '94.2%', highlight: 'bg-gradient-to-r from-gray-400 to-gray-500' },
+                              { rank: 3, name: 'SpeedSeer', score: '91.7%', highlight: 'bg-gradient-to-r from-orange-500 to-orange-600' }
+                            ],
+                            '2': [ // Crypto Portfolio Sim
+                              { rank: 1, name: 'CryptoKing', score: '$2.4M', highlight: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
+                              { rank: 2, name: 'DiamondHands', score: '$1.8M', highlight: 'bg-gradient-to-r from-gray-400 to-gray-500' },
+                              { rank: 3, name: 'DeFiMaster', score: '$1.5M', highlight: 'bg-gradient-to-r from-orange-500 to-orange-600' }
+                            ],
+                            '3': [ // Memory Matrix
+                              { rank: 1, name: 'BrainPower', score: 'L47', highlight: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
+                              { rank: 2, name: 'MemoryMaster', score: 'L44', highlight: 'bg-gradient-to-r from-gray-400 to-gray-500' },
+                              { rank: 3, name: 'MindBender', score: 'L42', highlight: 'bg-gradient-to-r from-orange-500 to-orange-600' }
+                            ],
+                            '4': [ // Base Builder
+                              { rank: 1, name: 'ArchitectX', score: '127 builds', highlight: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
+                              { rank: 2, name: 'CityPlanner', score: '98 builds', highlight: 'bg-gradient-to-r from-gray-400 to-gray-500' },
+                              { rank: 3, name: 'MegaBuilder', score: '86 builds', highlight: 'bg-gradient-to-r from-orange-500 to-orange-600' }
+                            ]
+                          };
+
+                          const currentLeaderboard = gameLeaderboards[selectedGameLeaderboard] || gameLeaderboards['1'];
+
+                          return (
+                            <>
+                              {currentLeaderboard.map((player) => (
+                                <div key={player.rank} className={`${player.highlight} rounded-lg p-3 text-white flex items-center justify-between`}>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-2xl">
+                                      {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}
+                                    </span>
+                                    <span className="font-bold">#{player.rank}</span>
+                                  </div>
+                                  <span className="font-medium">{player.name}</span>
+                                  <span className="font-bold">{player.score}</span>
+                                </div>
+                              ))}
+
+                              {/* Current user's position for selected game */}
+                              <div className="bg-blue-900/30 border border-blue-600 rounded-lg p-3 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-blue-400 text-xl">{selectedGameData?.icon}</span>
+                                  <span className="font-bold text-white">#15</span>
+                                </div>
+                                <span className="text-white font-medium">
+                                  {currentUser?.username || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'You')}
+                                </span>
+                                <span className="text-[#00daa2] font-bold">
+                                  {selectedGameLeaderboard === '1' ? '87.3%' :
+                                   selectedGameLeaderboard === '2' ? '$850K' :
+                                   selectedGameLeaderboard === '3' ? 'L38' : '42 builds'}
+                                </span>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Your Progress Hub */}
+                  <div className="bg-gray-900 rounded-lg p-6">
+                    <h2 className="text-xl font-bold mb-4 text-white">Your Progress Hub:</h2>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <ul className="space-y-3 text-gray-100">
+                        <li className="flex items-center gap-3">
+                          <span className="text-lg">📈</span>
+                          <span>XP and level progression</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <span className="text-lg">🏆</span>
+                          <span>Achievement gallery</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <span className="text-lg">🎯</span>
+                          <span>Recent game sessions</span>
+                        </li>
+                      </ul>
+                      <ul className="space-y-3 text-gray-100">
+                        <li className="flex items-center gap-3">
+                          <span className="text-lg">🥇</span>
+                          <span>Global leaderboard ranking</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <span className="text-lg">⚡</span>
+                          <span>Performance analytics</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                          <span className="text-lg">🎮</span>
+                          <span>Gaming milestones</span>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               )}
 
               {arcadeTab === 'workshop' && (
-                <div className="space-y-6">
+                <div className="space-y-8">
+                  {/* Header */}
                   <div className="text-center space-y-4">
                     <div className="flex justify-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
-                        <Plus className="w-8 h-8 text-white" />
+                      <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                        <Wrench className="w-12 h-12 text-white" />
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold font-mono text-white">Workshop</h1>
-                    <p className="text-gray-200">
+                    <h1 className="text-4xl font-bold font-mono text-white">Workshop</h1>
+                    <p className="text-xl text-gray-200 font-sans">
                       Craft unique assets by combining tokens and NFTs
                     </p>
                     <div className="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-semibold">
                       Coming Soon
                     </div>
                   </div>
-                  <div className="bg-gray-900 rounded-lg p-8 text-center">
+
+                  {/* Description */}
+                  <div className="bg-gray-900 rounded-lg p-8 text-left max-w-2xl mx-auto">
                     <h2 className="text-2xl font-bold mb-4 text-white">How It Works</h2>
                     <p className="text-gray-100 mb-4">
                       The Workshop uses the <strong className="text-white">RYFT wrapping system</strong> to let you combine
@@ -1239,25 +1455,78 @@ export function DRVNDashboard() {
                       ingredients to unlock rare items, special abilities, and exclusive rewards!
                     </p>
                   </div>
+
+                  {/* Features */}
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-gray-900 rounded-lg p-6 text-center">
+                      <Package className="w-12 h-12 text-orange-600 mx-auto mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Combine Assets</h3>
+                      <p className="text-sm text-gray-100">
+                        Mix BSTR tokens with vehicle NFTs to create upgraded versions
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-6 text-center">
+                      <Sparkles className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Craft Rares</h3>
+                      <p className="text-sm text-gray-100">
+                        Special recipes unlock exclusive, limited-edition assets
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-6 text-center">
+                      <Wrench className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Use in Games</h3>
+                      <p className="text-sm text-gray-100">
+                        Crafted assets give you advantages in arcade games
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Email Signup */}
+                  <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-8 text-white">
+                    <h3 className="text-2xl font-bold mb-4 text-center">Get Notified</h3>
+                    <p className="mb-6 text-center">Be the first to know when the Workshop launches!</p>
+                    <div className="flex gap-3 max-w-md mx-auto">
+                      <input
+                        type="email"
+                        placeholder="your@email.com"
+                        className="flex-1 px-4 py-3 rounded-lg text-gray-900"
+                        disabled
+                      />
+                      <button
+                        className="bg-white text-orange-600 font-semibold px-6 py-3 rounded-lg opacity-50 cursor-not-allowed"
+                        disabled
+                      >
+                        Notify Me
+                      </button>
+                    </div>
+                    <p className="text-sm mt-3 opacity-80 text-center">
+                      Email signup coming soon!
+                    </p>
+                  </div>
                 </div>
               )}
 
               {arcadeTab === 'submit' && (
-                <div className="space-y-6">
+                <div className="space-y-8">
+                  {/* Header */}
                   <div className="text-center space-y-4">
                     <div className="flex justify-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
-                        <Plus className="w-8 h-8 text-white" />
+                      <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <Upload className="w-12 h-12 text-white" />
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold font-mono text-white">Submit Your Game</h1>
-                    <p className="text-gray-200">
+                    <h1 className="text-4xl font-bold font-mono text-white">Submit Your Game</h1>
+                    <p className="text-xl text-gray-200 font-sans">
                       Built something awesome? Share it with the DRVN community
                     </p>
                     <div className="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-semibold">
                       Coming Soon
                     </div>
                   </div>
+
+                  {/* Description */}
                   <div className="bg-gray-900 rounded-lg p-8">
                     <h2 className="text-2xl font-bold mb-4 text-white">Developer Program</h2>
                     <p className="text-gray-100 mb-4">
@@ -1268,6 +1537,74 @@ export function DRVNDashboard() {
                       Games earn revenue from transaction fees and in-game assets, with splits
                       benefiting both DRVN and developers.
                     </p>
+                  </div>
+
+                  {/* Benefits */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-gray-900 rounded-lg p-6">
+                      <DollarSign className="w-12 h-12 text-green-600 mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Earn Revenue</h3>
+                      <p className="text-sm text-gray-100">
+                        Developers earn a share of all in-game transactions and NFT sales
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-6">
+                      <Trophy className="w-12 h-12 text-yellow-600 mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Reach Players</h3>
+                      <p className="text-sm text-gray-100">
+                        Get your game in front of the DRVN community on Base and Farcaster
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-6">
+                      <Code className="w-12 h-12 text-blue-600 mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Integration Support</h3>
+                      <p className="text-sm text-gray-100">
+                        Full documentation and developer tools to integrate with arcade
+                      </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-6">
+                      <Upload className="w-12 h-12 text-purple-600 mb-4" />
+                      <h3 className="font-bold mb-2 text-white">Simple Process</h3>
+                      <p className="text-sm text-gray-100">
+                        Streamlined submission and approval process for quality games
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Requirements Preview */}
+                  <div className="bg-blue-900/20 rounded-lg p-6">
+                    <h3 className="font-bold mb-4 flex items-center gap-2 text-white">
+                      <Code className="w-5 h-5" />
+                      Submission Requirements (Preview)
+                    </h3>
+                    <ul className="space-y-2 text-sm text-gray-100">
+                      <li>✓ Game must integrate with user's Base wallet</li>
+                      <li>✓ XP and achievement system integration</li>
+                      <li>✓ Revenue sharing smart contract compliance</li>
+                      <li>✓ Testing and quality assurance</li>
+                      <li>✓ Game assets (icon, screenshots, description)</li>
+                      <li>✓ Developer information and support contact</li>
+                    </ul>
+                    <p className="text-xs text-gray-500 mt-4">
+                      Full requirements documentation will be available soon
+                    </p>
+                  </div>
+
+                  {/* Contact Form Placeholder */}
+                  <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg p-8 text-white text-center">
+                    <h3 className="text-2xl font-bold mb-4">Interested?</h3>
+                    <p className="mb-6">
+                      Leave your email and game details. We'll reach out when submissions open!
+                    </p>
+                    <button
+                      className="bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg opacity-50 cursor-not-allowed"
+                      disabled
+                    >
+                      Contact Form Coming Soon
+                    </button>
                   </div>
                 </div>
               )}
