@@ -1177,13 +1177,22 @@ export function DRVNDashboard() {
                           value={searchQuery}
                           onChange={handleSearchChange}
                           placeholder="Search games..."
-                          className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:border-[#00daa2] focus:outline-none"
+                          className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-10 py-3 text-white placeholder-gray-400 focus:border-[#00daa2] focus:outline-none"
                         />
                         <div className="absolute left-3 top-3.5">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                         </div>
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-3.5 text-gray-400 hover:text-white transition-colors"
+                            title="Clear search"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
