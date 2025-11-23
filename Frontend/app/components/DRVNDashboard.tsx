@@ -54,7 +54,7 @@ import { ConnectButton } from "./web3/ConnectButton";
 import TotalKeysMinted from "./web3/TotalKeysMinted";
 import { HeroHeader } from "./ui/hero-header";
 import type { Game, PlayerStats } from "../arcade/types";
-// import GameInfoModal from "../arcade/components/GameInfoModal";
+import GameInfoModal from "../arcade/components/GameInfoModal";
 import { cn } from "../../lib/utils";
 
 export function DRVNDashboard() {
@@ -66,8 +66,8 @@ export function DRVNDashboard() {
   const [currentCarIndex, setCurrentCarIndex] = useState(0);
   const [activePage, setActivePage] = useState("dashboard");
   const [arcadeTab, setArcadeTab] = useState("dashboard");
-  // const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  // const [modalOpen, setModalOpen] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [bookmarkedGames, setBookmarkedGames] = useState<Set<string>>(new Set());
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -319,6 +319,16 @@ export function DRVNDashboard() {
   };
 
   // Arcade functionality
+  const handleGameClick = (game: Game) => {
+    setSelectedGame(game);
+    setModalOpen(true);
+  };
+
+  const handleGameLaunch = (gameId: string) => {
+    console.log('Launching game:', gameId);
+    alert(`🎮 Game "${selectedGame?.title}" would launch here!\n\nIn the full version, this would open the actual game.`);
+  };
+
   const handleBookmarkToggle = (gameId: string) => {
     setBookmarkedGames((prev) => {
       const newSet = new Set(prev);
@@ -845,20 +855,6 @@ export function DRVNDashboard() {
                 <Gamepad2 className="w-6 h-6 text-[#00daa2]" />
                 Arcade
               </h1>
-              <div className="flex items-center gap-4">
-                <Button
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.open('/arcade', '_blank');
-                    }
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-600 text-gray-400 hover:text-white hover:border-[#00daa2]"
-                >
-                  Open Full Arcade
-                </Button>
-              </div>
             </div>
 
             {/* Desktop Navigation Bar */}
@@ -906,59 +902,6 @@ export function DRVNDashboard() {
               </div>
             </div>
 
-            {/* Mobile Navigation Tabs */}
-            <div className="flex md:hidden space-x-1 bg-gray-900/50 border border-gray-800 rounded-lg p-1 mb-6">
-              <button
-                onClick={() => setArcadeTab('dashboard')}
-                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                  arcadeTab === 'dashboard'
-                    ? 'bg-[#00daa2] text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => setArcadeTab('games')}
-                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                  arcadeTab === 'games'
-                    ? 'bg-[#00daa2] text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                Games
-              </button>
-              <button
-                onClick={() => setArcadeTab('stats')}
-                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                  arcadeTab === 'stats'
-                    ? 'bg-[#00daa2] text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                Stats
-              </button>
-              <button
-                onClick={() => setArcadeTab('workshop')}
-                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                  arcadeTab === 'workshop'
-                    ? 'bg-[#00daa2] text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                Workshop
-              </button>
-              <button
-                onClick={() => setArcadeTab('submit')}
-                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                  arcadeTab === 'submit'
-                    ? 'bg-[#00daa2] text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                Submit
-              </button>
-            </div>
 
             {/* Arcade Content */}
             <div className="min-h-[600px] pb-20 md:pb-0">
@@ -1032,10 +975,7 @@ export function DRVNDashboard() {
                         <Button
                           onClick={() => {
                             const featuredGame = PLACEHOLDER_GAMES.find(g => g.featured);
-                            if (featuredGame) {
-                              console.log('Featured game clicked:', featuredGame);
-                              alert(`🎮 Featured game "${featuredGame.title}" clicked!\n\nModal functionality temporarily disabled.`);
-                            }
+                            if (featuredGame) handleGameClick(featuredGame);
                           }}
                           className="bg-white text-purple-600 hover:bg-gray-100 flex items-center gap-2"
                         >
@@ -1118,10 +1058,7 @@ export function DRVNDashboard() {
                     {PLACEHOLDER_GAMES.map((game) => (
                       <div
                         key={game.id}
-                        onClick={() => {
-                          console.log('Game clicked:', game);
-                          alert(`🎮 Game "${game.title}" clicked!\n\nModal functionality temporarily disabled.`);
-                        }}
+                        onClick={() => handleGameClick(game)}
                         className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-[#00daa2] transition-all duration-200 cursor-pointer group"
                       >
                         <div className="flex items-center justify-between mb-3">
@@ -1308,14 +1245,14 @@ export function DRVNDashboard() {
             </nav>
 
             {/* Game Info Modal */}
-            {/* <GameInfoModal
+            <GameInfoModal
               game={selectedGame}
               isOpen={modalOpen}
               onClose={() => setModalOpen(false)}
               onLaunch={handleGameLaunch}
               onBookmarkToggle={handleBookmarkToggle}
               bookmarked={selectedGame ? bookmarkedGames.has(selectedGame.id) : false}
-            /> */}
+            />
           </div>
         );
 
@@ -1796,14 +1733,18 @@ export function DRVNDashboard() {
                 XP / coming soon
               </div>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu/Arcade Button */}
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-white border border-[#8351a1] md:hidden"
-                onClick={toggleMobileMenu}
+                onClick={activePage === "arcade" ? () => setActivePage('dashboard') : toggleMobileMenu}
               >
-                <Menu className="h-5 w-7" />
+                {activePage === "arcade" ? (
+                  <Gamepad2 className="h-5 w-7 text-[#00daa2]" />
+                ) : (
+                  <Menu className="h-5 w-7" />
+                )}
               </Button>
             </div>
           </header>
