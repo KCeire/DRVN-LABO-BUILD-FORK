@@ -886,16 +886,6 @@ export function DRVNDashboard() {
             {/* Desktop Navigation Bar */}
             <div className="hidden md:flex border-b border-gray-800 bg-gray-950 -mx-6 px-6 py-0 mb-6">
               <div className="flex items-center space-x-8 w-full">
-                {/* Return to Main App Button */}
-                <button
-                  onClick={() => setActivePage('dashboard')}
-                  className="flex items-center gap-2 py-4 px-3 text-gray-400 hover:text-white transition-colors"
-                  title="Return to main app"
-                >
-                  <Plus className="w-5 h-5 rotate-45" />
-                  <span className="text-sm">Back</span>
-                </button>
-
                 {/* Arcade Title */}
                 <div className="py-4">
                   <h1 className="text-lg font-bold font-mono text-[#00daa2]">
@@ -1326,7 +1316,7 @@ export function DRVNDashboard() {
                         {/* Game-specific leaderboard */}
                         {(() => {
                           const selectedGameData = PLACEHOLDER_GAMES.find(g => g.id === selectedGameLeaderboard);
-                          const gameLeaderboards = {
+                          const gameLeaderboards: Record<string, { rank: number; name: string; score: string; highlight: string; }[]> = {
                             '1': [ // F1 Race Predictor
                               { rank: 1, name: 'RaceOracle', score: '98.5%', highlight: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
                               { rank: 2, name: 'F1Prophet', score: '94.2%', highlight: 'bg-gradient-to-r from-gray-400 to-gray-500' },
