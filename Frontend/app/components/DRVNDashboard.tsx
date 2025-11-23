@@ -81,6 +81,11 @@ export function DRVNDashboard() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
+  // Game filtering state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+
   // Initialize Farcaster SDK
   useFarcasterSDK();
 
@@ -387,6 +392,19 @@ export function DRVNDashboard() {
 
       return newSet;
     });
+  };
+
+  // Game filtering event handlers
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const handleBookmarkFilterToggle = () => {
+    setShowBookmarkedOnly(!showBookmarkedOnly);
   };
 
   const scrollToTop = () => {
@@ -1156,6 +1174,8 @@ export function DRVNDashboard() {
                       <div className="relative">
                         <input
                           type="text"
+                          value={searchQuery}
+                          onChange={handleSearchChange}
                           placeholder="Search games..."
                           className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:border-[#00daa2] focus:outline-none"
                         />
@@ -1167,8 +1187,15 @@ export function DRVNDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                        <Bookmark className="w-4 h-4" />
+                      <button
+                        onClick={handleBookmarkFilterToggle}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-colors ${
+                          showBookmarkedOnly
+                            ? 'bg-[#00daa2] text-black hover:bg-[#00c49a]'
+                            : 'bg-gray-800 text-white hover:bg-gray-700'
+                        }`}
+                      >
+                        <Bookmark className={`w-4 h-4 ${showBookmarkedOnly ? 'fill-current' : ''}`} />
                         Show Bookmarked Only
                       </button>
                     </div>
@@ -1179,8 +1206,9 @@ export function DRVNDashboard() {
                     {['All', 'Prediction', 'Skill', 'Strategy', 'Racing', 'Puzzle', 'Social'].map((category) => (
                       <button
                         key={category}
+                        onClick={() => handleCategoryChange(category)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                          category === 'All'
+                          category === selectedCategory
                             ? 'border-[#00daa2] bg-[#00daa2] text-black'
                             : 'border-gray-700 text-gray-400 hover:text-white hover:border-[#00daa2]'
                         }`}
@@ -1190,9 +1218,36 @@ export function DRVNDashboard() {
                     ))}
                   </div>
 
-                  {/* Games Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {PLACEHOLDER_GAMES.map((game) => (
+                  {/* Filter games based on search, category, and bookmark status */}
+                  {(() => {
+                    const filteredGames = PLACEHOLDER_GAMES.filter((game) => {
+                      // Search filter
+                      const matchesSearch =
+                        game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        game.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+                      // Category filter
+                      const matchesCategory = selectedCategory === 'All' || game.category === selectedCategory;
+
+                      // Bookmark filter
+                      const matchesBookmark = !showBookmarkedOnly || bookmarkedGames.has(game.id);
+
+                      return matchesSearch && matchesCategory && matchesBookmark;
+                    });
+
+                    return (
+                      <>
+                        {/* Show results count */}
+                        <div className="text-sm text-gray-400 mb-4">
+                          {filteredGames.length === PLACEHOLDER_GAMES.length
+                            ? `Showing all ${filteredGames.length} games`
+                            : `Showing ${filteredGames.length} of ${PLACEHOLDER_GAMES.length} games`
+                          }
+                        </div>
+
+                        {/* Games Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {filteredGames.length > 0 ? filteredGames.map((game) => (
                       <div
                         key={game.id}
                         onClick={() => handleGameClick(game)}
@@ -1230,8 +1285,37 @@ export function DRVNDashboard() {
                           <span className="text-gray-400">{game.plays} plays</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                          )) : (
+                            <div className="col-span-full text-center py-12">
+                              <div className="text-6xl mb-4">🎮</div>
+                              <h3 className="text-xl font-bold text-white mb-2">No games found</h3>
+                              <p className="text-gray-400 mb-4">
+                                {searchQuery
+                                  ? `No games match "${searchQuery}"`
+                                  : showBookmarkedOnly
+                                  ? 'No bookmarked games found'
+                                  : selectedCategory !== 'All'
+                                  ? `No games in "${selectedCategory}" category`
+                                  : 'No games available'}
+                              </p>
+                              {(searchQuery || showBookmarkedOnly || selectedCategory !== 'All') && (
+                                <button
+                                  onClick={() => {
+                                    setSearchQuery('');
+                                    setSelectedCategory('All');
+                                    setShowBookmarkedOnly(false);
+                                  }}
+                                  className="px-4 py-2 bg-[#00daa2] text-black rounded-lg hover:bg-[#00c49a] transition-colors"
+                                >
+                                  Clear all filters
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
 
