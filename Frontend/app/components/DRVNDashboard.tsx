@@ -54,7 +54,7 @@ import { ConnectButton } from "./web3/ConnectButton";
 import TotalKeysMinted from "./web3/TotalKeysMinted";
 import { HeroHeader } from "./ui/hero-header";
 import type { Game, PlayerStats } from "../arcade/types";
-import GameInfoModal from "../arcade/components/GameInfoModal";
+// import GameInfoModal from "../arcade/components/GameInfoModal";
 import { cn } from "../../lib/utils";
 
 export function DRVNDashboard() {
@@ -67,7 +67,7 @@ export function DRVNDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
   const [arcadeTab, setArcadeTab] = useState("dashboard");
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  // const [modalOpen, setModalOpen] = useState(false);
   const [bookmarkedGames, setBookmarkedGames] = useState<Set<string>>(new Set());
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -1312,14 +1312,14 @@ export function DRVNDashboard() {
             </nav>
 
             {/* Game Info Modal */}
-            <GameInfoModal
+            {/* <GameInfoModal
               game={selectedGame}
               isOpen={modalOpen}
               onClose={() => setModalOpen(false)}
               onLaunch={handleGameLaunch}
               onBookmarkToggle={handleBookmarkToggle}
               bookmarked={selectedGame ? bookmarkedGames.has(selectedGame.id) : false}
-            />
+            /> */}
           </div>
         );
 
