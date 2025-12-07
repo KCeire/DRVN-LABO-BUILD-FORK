@@ -3,20 +3,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "wagmi";
-import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import {
-  Edit,
-  Save,
-  X,
-  User,
-  FileText,
-  Shield,
-  HelpCircle,
-  Upload,
-} from "lucide-react";
+import { Edit, Save, X, User, FileText, Shield, HelpCircle, Upload } from "lucide-react";
 import Image from "next/image";
 
 /**
@@ -67,15 +55,12 @@ interface SettingsProps {
  * - Success/error message display
  * - Additional settings sections (Accounts, Newsletter, About)
  */
-export function Settings({
-  currentUser,
-  isAuthenticated,
-  refreshUserData,
-}: SettingsProps) {
+export function Settings({ currentUser, isAuthenticated, refreshUserData }: SettingsProps) {
   // Wagmi hook to get connected wallet information
   const { address, isConnected } = useAccount();
 
   // State management for component functionality
+  const [activeTab, setActiveTab] = useState("Account"); // Active settings tab
   const [isEditing, setIsEditing] = useState(false); // Controls edit mode
   const [isLoading, setIsLoading] = useState(false); // Loading state for save operations
   const [isUploading, setIsUploading] = useState(false); // Loading state for image uploads
@@ -173,9 +158,7 @@ export function Settings({
    * Handles profile image upload
    * Sends file to upload API and updates form state with returned URL
    */
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -252,6 +235,9 @@ export function Settings({
   const handleSave = async () => {
     if (!address) return;
 
+    // Only save if we're actually in edit mode
+    if (!isEditing) return;
+
     // Validate username before saving to prevent conflicts
     const isUsernameValid = await validateUsername(formData.username);
     if (!isUsernameValid) return;
@@ -321,360 +307,443 @@ export function Settings({
     setUsernameError("");
   };
 
+  // Secondary navigation tabs
+  const secondaryNavigation = [
+    { name: "Account", current: activeTab === "Account" },
+    { name: "Accounts", current: activeTab === "Accounts" },
+    { name: "Newsletter", current: activeTab === "Newsletter" },
+    { name: "About", current: activeTab === "About" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-950 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header Section - Shows XP indicator for future features */}
-        <div className="flex items-center justify-between">
-          <div className="bg-black/80 border border-purple-500 px-3 py-1 rounded">
-            <span className="text-white text-sm">XP / coming soon</span>
-          </div>
-        </div>
-
-        {/* Main User Profile Section */}
-        <Card className="bg-gray-900/50 border border-purple-500/20">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {/* Profile Image Container with Upload Functionality */}
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#00daa2]">
-                    {formData.profileImage ? (
-                      <Image
-                        src={formData.profileImage}
-                        alt="Profile"
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      // Fallback gradient background with user icon when no image
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                        <User className="w-8 h-8 text-white" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Image Upload Button - Only visible in edit mode */}
-                  {isEditing && (
-                    <div className="absolute -bottom-1 -right-1">
-                      <label
-                        htmlFor="profile-image-upload"
-                        className="cursor-pointer"
-                      >
-                        <div className="w-6 h-6 bg-[#00daa2] rounded-full flex items-center justify-center hover:bg-[#00cc6a] transition-colors">
-                          <Upload className="w-3 h-3 text-black" />
-                        </div>
-                      </label>
-                      <input
-                        id="profile-image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Username Display/Edit Field */}
-                <div>
-                  <h2 className="text-xl font-bold text-white font-mono">
-                    {isEditing ? (
-                      <Input
-                        value={formData.username}
-                        onChange={(e) =>
-                          handleInputChange("username", e.target.value)
-                        }
-                        className="bg-gray-800 border-gray-600 text-white w-32"
-                        placeholder="Username"
-                      />
-                    ) : (
-                      currentUser.username || "No username set"
-                    )}
-                  </h2>
-                </div>
-
-                {/* Edit Button - Only visible when not editing */}
-                {!isEditing && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsEditing(true)}
-                    className="text-[#00daa2] hover:text-[#00daa2] hover:bg-gray-800"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            {/* Profile Form Fields - Grid layout for first/last name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* First Name Field */}
-              <div className="space-y-2">
-                <label className="text-gray-400 text-sm font-mono">
-                  First Name
-                </label>
-                {isEditing ? (
-                  <Input
-                    value={formData.firstName}
-                    onChange={(e) =>
-                      handleInputChange("firstName", e.target.value)
-                    }
-                    className="bg-gray-800 border-gray-600 text-white"
-                    placeholder="First Name"
-                  />
-                ) : (
-                  <div className="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white">
-                    {currentUser.firstName || "No first name set"}
-                  </div>
-                )}
-              </div>
-
-              {/* Last Name Field */}
-              <div className="space-y-2">
-                <label className="text-gray-400 text-sm font-mono">
-                  Last Name
-                </label>
-                {isEditing ? (
-                  <Input
-                    value={formData.lastName}
-                    onChange={(e) =>
-                      handleInputChange("lastName", e.target.value)
-                    }
-                    className="bg-gray-800 border-gray-600 text-white"
-                    placeholder="Last Name"
-                  />
-                ) : (
-                  <div className="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white">
-                    {currentUser.lastName || "No last name set"}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Bio Field - Larger textarea for longer content */}
-            <div className="space-y-2">
-              <label className="text-gray-400 text-sm font-mono">Bio</label>
-              {isEditing ? (
-                <Textarea
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange("bio", e.target.value)}
-                  className="bg-gray-800 border-gray-600 text-white min-h-[100px]"
-                  placeholder="Tell us about yourself..."
-                />
-              ) : (
-                <div className="bg-gray-800 border border-gray-600 rounded px-3 py-2 py-3 text-white min-h-[100px]">
-                  {currentUser.bio || "No bio set"}
-                </div>
-              )}
-            </div>
-
-            {/* Username Field - Separate section with validation */}
-            <div className="space-y-2">
-              <label className="text-gray-400 text-sm font-mono">
-                Username
-              </label>
-              {isEditing ? (
-                <div>
-                  <Input
-                    value={formData.username}
-                    onChange={(e) =>
-                      handleInputChange("username", e.target.value)
-                    }
-                    className={`bg-gray-800 border-gray-600 text-white ${
-                      usernameError ? "border-red-500" : ""
-                    }`}
-                    placeholder="Username"
-                  />
-                  {/* Username validation error display */}
-                  {usernameError && (
-                    <p className="text-red-400 text-xs mt-1">{usernameError}</p>
-                  )}
-                </div>
-              ) : (
-                <div className="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white">
-                  {currentUser.username || "No username set"}
-                </div>
-              )}
-            </div>
-
-            {/* Action Buttons - Save/Cancel when editing */}
-            {isEditing && (
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={handleSave}
-                  disabled={isLoading || isUploading}
-                  className="bg-[#00daa2] text-black hover:bg-[#00cc6a] font-mono"
+    <div className="min-h-screen bg-none">
+      {/* Secondary navigation header */}
+      <header className="border-b border-gray-200 dark:border-white/5">
+        <nav className="flex overflow-x-auto py-4">
+          <ul
+            role="list"
+            className="flex min-w-full flex-none gap-x-6 px-4 text-sm/6 font-semibold text-gray-500 sm:px-6 lg:px-8 dark:text-gray-400"
+          >
+            {secondaryNavigation.map((item) => (
+              <li key={item.name}>
+                <button
+                  onClick={() => setActiveTab(item.name)}
+                  className={item.current ? "text-[#00daa2] dark:text-[#00daa2]" : ""}
                 >
-                  <Save className="w-4 h-4 mr-2" />
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  className="border-gray-600 text-white hover:bg-gray-800 font-mono"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-              </div>
-            )}
+                  {item.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </header>
 
-            {/* Success/Error Message Display */}
-            {message && (
-              <div
-                className={`p-3 rounded border ${
-                  message.type === "success"
-                    ? "bg-green-900/20 border-green-500 text-green-400"
-                    : "bg-red-900/20 border-red-500 text-red-400"
-                }`}
+      <main>
+        <h1 className="sr-only">Account Settings</h1>
+
+        {/* Settings forms */}
+        <div className="divide-y divide-gray-200 dark:divide-white/10">
+          {/* Account Tab - Personal Information */}
+          {activeTab === "Account" && (
+            <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+              <div>
+                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
+                  Personal Information
+                </h2>
+                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                  Update your profile information and preferences.
+                </p>
+              </div>
+
+              <form
+                className="md:col-span-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  // Only submit if we're in edit mode
+                  if (isEditing) {
+                    handleSave();
+                  }
+                }}
               >
-                {message.text}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Additional Settings Sections - Placeholder sections for future features */}
-        <div className="space-y-4">
-          {/* Accounts Section - Wallet management (future feature) */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 font-mono">
-              Accounts
-            </h3>
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-white font-mono">Manage Wallets</span>
-                </div>
-                <div className="text-[#00daa2]">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Newsletter Section - Email signup (future feature) */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 font-mono">
-              Newsletter
-            </h3>
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-white font-mono">
-                    Sign Up For Our Newsletter
-                  </span>
-                </div>
-                <div className="w-5 h-5 bg-orange-500 rounded flex items-center justify-center">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* About Section - Legal and support links (future features) */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 font-mono">About</h3>
-            <div className="space-y-3">
-              {/* Legal and Policies */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center">
-                      <Shield className="w-4 h-4 text-white" />
+                <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
+                  {/* Profile Image */}
+                  <div className="col-span-full flex items-center gap-x-8">
+                    <div className="relative">
+                      {formData.profileImage ? (
+                        <Image
+                          src={formData.profileImage}
+                          alt="Profile"
+                          width={96}
+                          height={96}
+                          className="size-24 flex-none rounded-lg bg-gray-100 object-cover outline -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10"
+                        />
+                      ) : (
+                        <div className="size-24 flex-none rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center outline -outline-offset-1 outline-black/5 dark:outline-white/10">
+                          <User className="w-12 h-12 text-white" />
+                        </div>
+                      )}
                     </div>
-                    <span className="text-white font-mono">
-                      Legal And Policies
-                    </span>
+                    <div>
+                      {isEditing ? (
+                        <>
+                          <label
+                            htmlFor="profile-image-upload"
+                            className="cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20"
+                          >
+                            Change avatar
+                          </label>
+                          <input
+                            id="profile-image-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                          <p className="mt-2 text-xs/5 text-gray-500 dark:text-gray-400">
+                            JPG, GIF or PNG. 1MB max.
+                          </p>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                          className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20"
+                        >
+                          Change avatar
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-[#00daa2]">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+
+                  {/* First Name */}
+                  <div className="sm:col-span-3">
+                    <label
+                      htmlFor="first-name"
+                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                      First name
+                    </label>
+                    <div className="mt-2">
+                      {isEditing ? (
+                        <input
+                          id="first-name"
+                          name="first-name"
+                          type="text"
+                          autoComplete="given-name"
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange("firstName", e.target.value)}
+                          className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-[#00daa2]"
+                          placeholder="First Name"
+                        />
+                      ) : (
+                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
+                          {currentUser.firstName || "No first name set"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Last Name */}
+                  <div className="sm:col-span-3">
+                    <label
+                      htmlFor="last-name"
+                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                    >
+                      Last name
+                    </label>
+                    <div className="mt-2">
+                      {isEditing ? (
+                        <input
+                          id="last-name"
+                          name="last-name"
+                          type="text"
+                          autoComplete="family-name"
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange("lastName", e.target.value)}
+                          className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-[#00daa2]"
+                          placeholder="Last Name"
+                        />
+                      ) : (
+                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
+                          {currentUser.lastName || "No last name set"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Username */}
+                  <div className="col-span-full">
+                    <label
+                      htmlFor="username"
+                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                    >
+                      Username
+                    </label>
+                    <div className="mt-2">
+                      {isEditing ? (
+                        <div>
+                          <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            value={formData.username}
+                            onChange={(e) => handleInputChange("username", e.target.value)}
+                            className={`block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 ${
+                              usernameError
+                                ? "outline-red-500"
+                                : "outline-gray-300 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2]"
+                            } placeholder:text-gray-400 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 ${
+                              !usernameError && "dark:focus:outline-[#00daa2]"
+                            }`}
+                            placeholder="Username"
+                          />
+                          {usernameError && (
+                            <p className="mt-1 text-xs/5 text-red-400">{usernameError}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
+                          {currentUser.username || "No username set"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  <div className="col-span-full">
+                    <label
+                      htmlFor="bio"
+                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                    >
+                      Bio
+                    </label>
+                    <div className="mt-2">
+                      {isEditing ? (
+                        <textarea
+                          id="bio"
+                          name="bio"
+                          rows={4}
+                          value={formData.bio}
+                          onChange={(e) => handleInputChange("bio", e.target.value)}
+                          className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-[#00daa2]"
+                          placeholder="Tell us about yourself..."
+                        />
+                      ) : (
+                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 min-h-[100px] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
+                          {currentUser.bio || "No bio set"}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Action Buttons */}
+                {isEditing ? (
+                  <div className="mt-8 flex gap-3">
+                    <Button
+                      type="submit"
+                      disabled={isLoading || isUploading}
+                      className="rounded-md bg-[#00daa2] px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#00cc6a] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00daa2] dark:shadow-none dark:hover:bg-[#00b894]"
+                    >
+                      {isLoading ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancel}
+                      className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-8 flex">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsEditing(true);
+                      }}
+                      className="rounded-md bg-[#00daa2] px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#00cc6a] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00daa2] dark:shadow-none dark:hover:bg-[#00b894]"
+                    >
+                      Edit Profile
+                    </button>
+                  </div>
+                )}
+
+                {/* Success/Error Message */}
+                {message && (
+                  <div
+                    className={`mt-4 p-3 rounded-md border ${
+                      message.type === "success"
+                        ? "bg-green-900/20 border-green-500 text-green-400"
+                        : "bg-red-900/20 border-red-500 text-red-400"
+                    }`}
+                  >
+                    {message.text}
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+
+          {/* Accounts Tab - Wallet Management */}
+          {activeTab === "Accounts" && (
+            <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+              <div>
+                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
+                  Manage Wallets
+                </h2>
+                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                  Connect and manage your wallet addresses.
+                </p>
               </div>
 
-              {/* Contact and Links */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center">
-                      <HelpCircle className="w-4 h-4 text-white" />
+              <div className="md:col-span-2">
+                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
+                        <User className="w-4 h-4 text-gray-600 dark:text-white" />
+                      </div>
+                      <span className="text-gray-900 font-semibold dark:text-white">
+                        Manage Wallets
+                      </span>
                     </div>
-                    <span className="text-white font-mono">
-                      Contact & Links
-                    </span>
-                  </div>
-                  <div className="text-[#00daa2]">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                    <div className="text-[#00daa2]">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* Version Footer - App version indicator */}
-        <div className="text-center pt-8">
-          <span className="text-gray-400 text-sm font-mono">v0.1.0</span>
+          {/* Newsletter Tab */}
+          {activeTab === "Newsletter" && (
+            <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+              <div>
+                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
+                  Newsletter
+                </h2>
+                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                  Sign up for our newsletter to stay updated.
+                </p>
+              </div>
+
+              <div className="md:col-span-2">
+                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
+                        <FileText className="w-4 h-4 text-gray-600 dark:text-white" />
+                      </div>
+                      <span className="text-gray-900 font-semibold dark:text-white">
+                        Sign Up For Our Newsletter
+                      </span>
+                    </div>
+                    <div className="w-5 h-5 bg-orange-500 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* About Tab - Legal and Contact */}
+          {activeTab === "About" && (
+            <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+              <div>
+                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">About</h2>
+                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                  Legal information and support resources.
+                </p>
+              </div>
+
+              <div className="md:col-span-2 space-y-3">
+                {/* Legal and Policies */}
+                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
+                        <Shield className="w-4 h-4 text-gray-600 dark:text-white" />
+                      </div>
+                      <span className="text-gray-900 font-semibold dark:text-white">
+                        Legal And Policies
+                      </span>
+                    </div>
+                    <div className="text-[#00daa2]">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact and Links */}
+                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
+                        <HelpCircle className="w-4 h-4 text-gray-600 dark:text-white" />
+                      </div>
+                      <span className="text-gray-900 font-semibold dark:text-white">
+                        Contact & Links
+                      </span>
+                    </div>
+                    <div className="text-[#00daa2]">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

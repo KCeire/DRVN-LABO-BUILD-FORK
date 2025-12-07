@@ -14,21 +14,23 @@ DRVN VHCLS is a next-generation automotive platform that combines the thrill of 
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 14](https://nextjs.org/) with App Router
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with custom theme
-- **Web3**: [OnchainKit](https://www.base.org/builders/onchainkit) for wallet integration
+- **Framework**: [Next.js 15.5.7](https://nextjs.org/) with App Router
+- **React**: [React 19.2.1](https://react.dev/)
+- **Styling**: [Tailwind CSS 4.1.17](https://tailwindcss.com/) with custom theme
+- **Web3**: [OnchainKit 1.0.3](https://www.base.org/builders/onchainkit) for wallet integration
 - **Blockchain**: [Base](https://base.org/) network
+- **State Management**: [Wagmi 2.16.0](https://wagmi.sh/) & [TanStack Query 5](https://tanstack.com/query)
 - **Authentication**: Wallet-based with MongoDB user management
 - **Notifications**: Redis-powered real-time notifications
 - **File Storage**: IPFS via Pinata for profile images
-- **UI Components**: Custom component library with Lucide React icons
+- **UI Components**: Custom component library with Radix UI and Lucide React icons
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- Yarn package manager
+- Node.js 22.x or higher
+- npm (comes with Node.js)
 - Git
 
 ### Installation
@@ -43,7 +45,8 @@ DRVN VHCLS is a next-generation automotive platform that combines the thrill of 
 2. **Install dependencies**
 
    ```bash
-   yarn install
+   cd Frontend
+   npm install
    ```
 
 3. **Set up environment variables**
@@ -55,47 +58,70 @@ DRVN VHCLS is a next-generation automotive platform that combines the thrill of 
    cp .env.example .env.local
    ```
 
-   Then edit `.env.local` and fill in your actual values for the following variables:
+   Then edit `.env.local` and fill in your actual values. See `example.md` for a complete reference, or use the following required variables:
 
    ```env
-   # Shared/OnchainKit variables
+   # OnchainKit Configuration (Required)
+   # Get your API key from: https://portal.cdp.coinbase.com/
    NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=DRVN VHCLS
-   NEXT_PUBLIC_URL=http://localhost:3000
-   NEXT_PUBLIC_ICON_URL=https://your-domain.com/icon.png
+   NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID=your_project_id
    NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_onchainkit_api_key
+   NEXT_ONCHAINKIT_API_KEY=your_onchainkit_api_key
+   NEXT_PUBLIC_URL=http://localhost:3000
 
-   # Frame metadata
+   # App Metadata (for Base Mini App)
+   NEXT_PUBLIC_APP_ICON=$NEXT_PUBLIC_URL/newIcon.png
+   NEXT_PUBLIC_APP_SUBTITLE=Automotive RWA and Car Culture
+   NEXT_PUBLIC_APP_DESCRIPTION=Bringing car culture onchain We tokenize real automotive assets, unlock transparent ownership, and rally a community to fund, govern and grow the garage—together.
+   NEXT_PUBLIC_APP_SPLASH_IMAGE=$NEXT_PUBLIC_URL/newSplash.png
+   NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR="#000000"
+   NEXT_PUBLIC_APP_PRIMARY_CATEGORY=finance
+   NEXT_PUBLIC_APP_HERO_IMAGE=$NEXT_PUBLIC_URL/newHero.png
+   NEXT_PUBLIC_APP_TAGLINE=Bringing car culture onchain.
+   NEXT_PUBLIC_APP_OG_TITLE=DRVN VHCLS
+   NEXT_PUBLIC_APP_OG_DESCRIPTION=Automotive RWA and Car Culture
+   NEXT_PUBLIC_APP_OG_IMAGE=$NEXT_PUBLIC_URL/newIcon.png
+   NEXT_PUBLIC_ICON_URL=$NEXT_PUBLIC_URL/newIcon.png
+
+   # Optional: Paymaster & Bundler (for gasless transactions)
+   NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT=your_paymaster_endpoint
+
+   # Farcaster Frame Configuration (optional)
    FARCASTER_HEADER=your_farcaster_header
    FARCASTER_PAYLOAD=your_farcaster_payload
    FARCASTER_SIGNATURE=your_farcaster_signature
-   NEXT_PUBLIC_APP_ICON=https://your-domain.com/icon.png
-   NEXT_PUBLIC_APP_SUBTITLE=Premium Automotive Marketplace
-   NEXT_PUBLIC_APP_DESCRIPTION=Exclusive car collections and trading platform
-   NEXT_PUBLIC_APP_SPLASH_IMAGE=https://your-domain.com/splash.jpg
-   NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR=#00daa2
-   NEXT_PUBLIC_APP_PRIMARY_CATEGORY=Automotive
-   NEXT_PUBLIC_APP_HERO_IMAGE=https://your-domain.com/hero.jpg
-   NEXT_PUBLIC_APP_TAGLINE=Where Cars Meet Culture
-   NEXT_PUBLIC_APP_OG_TITLE=DRVN VHCLS - Premium Automotive Marketplace
-   NEXT_PUBLIC_APP_OG_DESCRIPTION=Exclusive car collections and trading platform
-   NEXT_PUBLIC_APP_OG_IMAGE=https://your-domain.com/og-image.jpg
 
-   # Database
+   # Database (Required)
    MONGODB_URI=your_mongodb_connection_string
 
-   # Redis config (for notifications)
+   # Redis Configuration (Required - for notifications and caching)
+   # Get your Redis URL and token from: https://console.upstash.com/
    REDIS_URL=your_redis_url
    REDIS_TOKEN=your_redis_token
 
-   # IPFS/Pinata config (for profile image uploads)
+   # IPFS/Pinata Configuration (Required - for profile image uploads)
+   # Get your API keys from: https://app.pinata.cloud/
    NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
    NEXT_PUBLIC_PINATA_SECRET_KEY=your_pinata_secret_key
+
+   # Optional: IPFS Gateway (defaults to Pinata gateway)
+   NEXT_PUBLIC_IPFS_GATEWAY=your_custom_ipfs_gateway
+
+   # Encryption Key (optional, auto-generated if not provided)
+   # Used for encrypting sensitive user data (must be 32 characters)
+   ENCRYPTION_KEY=your_32_character_encryption_key
+
+   # Alchemy API (for blockchain data)
+   ALCHEMY_API_KEY=your_alchemy_api_key
+
+   # Contract Addresses
+   NEXT_PUBLIC_BSTR_CONTRACT_ADDRESS=your_bstr_contract_address
    ```
 
 4. **Start the development server**
 
    ```bash
-   yarn dev
+   npm run dev
    ```
 
 5. **Open your browser**
@@ -162,50 +188,44 @@ drvn-mini-app/
 
 ```bash
 # Install dependencies
-yarn install
+npm install
 
 # Start development server
-yarn dev
+npm run dev
 
 # Build for production
-yarn build
+npm run build
 
 # Start production server
-yarn start
+npm run start
 
 # Run linting
-yarn lint
+npm run lint
 
 # Run type checking
-yarn type-check
+npm run typecheck
 
 # Format code with Prettier
-yarn format
+npm run format
 
 # Check Prettier formatting
-yarn format:check
-
-# Run tests
-yarn test
-
-# Run tests in watch mode
-yarn test:watch
+npm run format:check
 ```
 
 ## 🚀 Vercel Deployment Guide
 
 ### Prerequisites
 
-- Node.js 18+ installed
-- Yarn package manager
+- Node.js 22.x or higher installed
+- npm (comes with Node.js)
 - Git repository connected to GitHub/GitLab
 - Vercel account (free tier available)
 
 ### Step 1: Install Vercel CLI
 
 ```bash
-# Install Vercel CLI globally using yarn
-yarn global add vercel
+# Install Vercel CLI globally using npm
+npm install -g vercel
 
 # Verify installation
 vercel --version
@@ -242,14 +262,26 @@ vercel
 ### Step 4: Configure Environment Variables
 
 ```bash
-# Add environment variables to Vercel
+# Add required environment variables to Vercel
 vercel env add NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME
+vercel env add NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID
+vercel env add NEXT_PUBLIC_ONCHAINKIT_API_KEY
+vercel env add NEXT_ONCHAINKIT_API_KEY
 vercel env add NEXT_PUBLIC_URL
 vercel env add MONGODB_URI
 vercel env add REDIS_URL
 vercel env add REDIS_TOKEN
 vercel env add NEXT_PUBLIC_PINATA_API_KEY
 vercel env add NEXT_PUBLIC_PINATA_SECRET_KEY
+vercel env add ALCHEMY_API_KEY
+vercel env add NEXT_PUBLIC_BSTR_CONTRACT_ADDRESS
+
+# Optional variables
+vercel env add NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT
+vercel env add ENCRYPTION_KEY
+vercel env add FARCASTER_HEADER
+vercel env add FARCASTER_PAYLOAD
+vercel env add FARCASTER_SIGNATURE
 
 # Add all other environment variables as needed
 # Each command will prompt you to enter the value
@@ -365,8 +397,8 @@ vercel project ls
 
 ```bash
 # 1. Build and test locally
-yarn build
-yarn start
+npm run build
+npm run start
 
 # 2. Commit and push changes
 git add .
@@ -395,12 +427,17 @@ Create a `vercel.json` file in your project root for advanced configuration:
   ],
   "env": {
     "NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME": "@drvn-onchainkit-project-name",
+    "NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID": "@drvn-onchainkit-project-id",
+    "NEXT_PUBLIC_ONCHAINKIT_API_KEY": "@drvn-onchainkit-api-key",
+    "NEXT_ONCHAINKIT_API_KEY": "@drvn-onchainkit-api-key",
     "NEXT_PUBLIC_URL": "@drvn-public-url",
     "MONGODB_URI": "@drvn-mongodb-uri",
     "REDIS_URL": "@drvn-redis-url",
     "REDIS_TOKEN": "@drvn-redis-token",
     "NEXT_PUBLIC_PINATA_API_KEY": "@drvn-pinata-api-key",
-    "NEXT_PUBLIC_PINATA_SECRET_KEY": "@drvn-pinata-secret-key"
+    "NEXT_PUBLIC_PINATA_SECRET_KEY": "@drvn-pinata-secret-key",
+    "ALCHEMY_API_KEY": "@drvn-alchemy-api-key",
+    "NEXT_PUBLIC_BSTR_CONTRACT_ADDRESS": "@drvn-bstr-contract-address"
   }
 }
 ```
@@ -410,7 +447,7 @@ Create a `vercel.json` file in your project root for advanced configuration:
 - [ ] Vercel CLI installed and logged in
 - [ ] Project initialized with `vercel`
 - [ ] Environment variables configured
-- [ ] Local build successful (`yarn build`)
+- [ ] Local build successful (`npm run build`)
 - [ ] Staging deployment tested
 - [ ] Production deployment completed
 - [ ] Custom domain configured (if needed)
@@ -513,8 +550,8 @@ The application requires several environment variables for full functionality:
 
 ### Manual Deployment
 
-1. Build the application: `yarn build`
-2. Start the production server: `yarn start`
+1. Build the application: `npm run build`
+2. Start the production server: `npm run start`
 3. Configure your reverse proxy (nginx/Apache)
 4. Set up SSL certificates
 
