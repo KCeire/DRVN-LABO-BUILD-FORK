@@ -61,61 +61,39 @@ DRVN VHCLS is a next-generation automotive platform that combines the thrill of 
    Then edit `.env.local` and fill in your actual values. See `example.md` for a complete reference, or use the following required variables:
 
    ```env
-   # OnchainKit Configuration (Required)
-   # Get your API key from: https://portal.cdp.coinbase.com/
-   NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=DRVN VHCLS
-   NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID=your_project_id
-   NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_onchainkit_api_key
-   NEXT_ONCHAINKIT_API_KEY=your_onchainkit_api_key
-   NEXT_PUBLIC_URL=http://localhost:3000
+ # Shared/OnchainKit variables
+NEXT_PUBLIC_PROJECT_NAME=
+NEXT_PUBLIC_URL=http://localhost:3000
+NEXT_PUBLIC_ONCHAINKIT_API_KEY=
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID=
+# NEXT_PUBLIC_ICON_URL=
 
-   # App Metadata (for Base Mini App)
-   NEXT_PUBLIC_APP_ICON=$NEXT_PUBLIC_URL/newIcon.png
-   NEXT_PUBLIC_APP_SUBTITLE=Automotive RWA and Car Culture
-   NEXT_PUBLIC_APP_DESCRIPTION=Bringing car culture onchain We tokenize real automotive assets, unlock transparent ownership, and rally a community to fund, govern and grow the garage—together.
-   NEXT_PUBLIC_APP_SPLASH_IMAGE=$NEXT_PUBLIC_URL/newSplash.png
-   NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR="#000000"
-   NEXT_PUBLIC_APP_PRIMARY_CATEGORY=finance
-   NEXT_PUBLIC_APP_HERO_IMAGE=$NEXT_PUBLIC_URL/newHero.png
-   NEXT_PUBLIC_APP_TAGLINE=Bringing car culture onchain.
-   NEXT_PUBLIC_APP_OG_TITLE=DRVN VHCLS
-   NEXT_PUBLIC_APP_OG_DESCRIPTION=Automotive RWA and Car Culture
-   NEXT_PUBLIC_APP_OG_IMAGE=$NEXT_PUBLIC_URL/newIcon.png
-   NEXT_PUBLIC_ICON_URL=$NEXT_PUBLIC_URL/newIcon.png
 
-   # Optional: Paymaster & Bundler (for gasless transactions)
-   NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT=your_paymaster_endpoint
+# Redis config
+REDIS_URL=
+REDIS_TOKEN=
 
-   # Farcaster Frame Configuration (optional)
-   FARCASTER_HEADER=your_farcaster_header
-   FARCASTER_PAYLOAD=your_farcaster_payload
-   FARCASTER_SIGNATURE=your_farcaster_signature
+#MongoDB Database
+MONGODB_URI=
+ENCRYPTION_KEY=
 
-   # Database (Required)
-   MONGODB_URI=your_mongodb_connection_string
+# IPFS Configuration
+NEXT_PUBLIC_PINATA_API_KEY=
+NEXT_PUBLIC_PINATA_SECRET_KEY=
+PINATA_JWT=
+NEXT_PUBLIC_IPFS_GATEWAY=
 
-   # Redis Configuration (Required - for notifications and caching)
-   # Get your Redis URL and token from: https://console.upstash.com/
-   REDIS_URL=your_redis_url
-   REDIS_TOKEN=your_redis_token
+# Reown Wallet Key
+NEXT_PUBLIC_PROJECT_ID=
 
-   # IPFS/Pinata Configuration (Required - for profile image uploads)
-   # Get your API keys from: https://app.pinata.cloud/
-   NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
-   NEXT_PUBLIC_PINATA_SECRET_KEY=your_pinata_secret_key
+# Alchemy API Key
+ALCHEMY_API_KEY=
+NEXT_PUBLIC_BASE_RPC_URL=
 
-   # Optional: IPFS Gateway (defaults to Pinata gateway)
-   NEXT_PUBLIC_IPFS_GATEWAY=your_custom_ipfs_gateway
-
-   # Encryption Key (optional, auto-generated if not provided)
-   # Used for encrypting sensitive user data (must be 32 characters)
-   ENCRYPTION_KEY=your_32_character_encryption_key
-
-   # Alchemy API (for blockchain data)
-   ALCHEMY_API_KEY=your_alchemy_api_key
-
-   # Contract Addresses
-   NEXT_PUBLIC_BSTR_CONTRACT_ADDRESS=your_bstr_contract_address
+# Buster Token Variables
+NEXT_PUBLIC_BSTR_CONTRACT_ADDRESS=
+NEXT_PUBLIC_BSTR_ETH_POOL_ADDRESS=
+NEXT_PUBLIC_BSTR_USDC_POOL_ADDRESS=
    ```
 
 4. **Start the development server**

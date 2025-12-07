@@ -154,7 +154,7 @@ export function DRVNPortfolio({
     {
       name: "BSTR",
       value: formatBalance(bstrBalance, DRVN_TOKENS.BSTR.decimals),
-      onClick: () => onNavigate?.("garage"),
+      onClick: () => onNavigate?.("buster-club"),
       icon: <TokenChip token={DRVN_TOKENS.BSTR} />,
     },
     {
