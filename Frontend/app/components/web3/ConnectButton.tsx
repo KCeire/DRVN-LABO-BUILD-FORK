@@ -2,11 +2,13 @@
 
 import { ConnectWallet, Wallet } from "@coinbase/onchainkit/wallet";
 import { Name, Identity } from "@coinbase/onchainkit/identity";
+import { useUnifiedMiniAppDetection } from "@/hooks/useUnifiedMiniAppDetection";
 import { FaTimes, FaCopy, FaNetworkWired } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useClientMounted } from "../../../hooks/useClientMount";
 import { useAccount, useDisconnect } from "wagmi";
 import Image from "next/image";
+import type React from "react";
 
 interface ConnectButtonProps {
   variant?: "default" | "modal" | "sidebar";
@@ -17,6 +19,7 @@ export const ConnectButton = (
 ) => {
   const { address, chain } = useAccount();
   const { disconnect } = useDisconnect();
+  const { isInMiniApp } = useUnifiedMiniAppDetection();
   const mounted = useClientMounted();
   const [showDetails, setShowDetails] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -24,6 +27,35 @@ export const ConnectButton = (
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isModalVariant = variant === "modal";
   const isSidebarVariant = variant === "sidebar";
+
+  // Debug logging for mini app wallet connection
+  useEffect(() => {
+    if (isInMiniApp) {
+      console.log("🔗 Mini app detected in ConnectButton, isConnected:", !!address);
+      console.log("🔗 ConnectButton variant:", variant);
+    }
+  }, [isInMiniApp, address, variant]);
+
+  // Force modal to show in mini apps when ConnectWallet is clicked
+  useEffect(() => {
+    if (isInMiniApp && !address) {
+      // Ensure wallet modal can render in mini app context
+      const checkModal = () => {
+        const modal = document.querySelector('[data-testid*="ockWalletModal"]');
+        const portal = document.querySelector('[data-radix-portal]');
+        console.log("🔗 Modal check:", {
+          modalExists: !!modal,
+          portalExists: !!portal,
+          modalVisible: modal ? window.getComputedStyle(modal as Element).display !== "none" : false,
+        });
+      };
+      
+      // Check immediately and after a delay
+      checkModal();
+      const timeout = setTimeout(checkModal, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isInMiniApp, address]);
 
   // We'll use OnchainKit Identity component with controlled styling
 
@@ -86,11 +118,23 @@ export const ConnectButton = (
 
   if (!mounted) return null;
 
+  // In mini apps, ensure Wallet component doesn't interfere with modal rendering
+  // Remove any constraints that might prevent modal from showing
+  const walletWrapperProps = isInMiniApp
+    ? {
+        className: "z-10 w-full",
+        style: { 
+          position: "relative" as const,
+          isolation: "auto" as const, // Allow portals to escape
+        },
+      }
+    : { className: "z-10 w-full" };
+
   return (
     <div className="relative flex justify-center" ref={dropdownRef}>
       {!address ? (
         // Show ConnectWallet when not connected
-        <Wallet className="z-10 w-full">
+        <Wallet {...walletWrapperProps}>
           {isModalVariant ? (
             // Modal variant - Unique pill-shaped style with shimmer effect
             <div className="connect-wallet-modal-btn w-full relative group">

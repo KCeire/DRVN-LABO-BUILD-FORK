@@ -117,7 +117,10 @@ export function AuthChoiceModal({ isOpen, onClose, onSuccess }: AuthChoiceModalP
     // Don't show modal yet - wait for wallet connection
   };
 
-  const handleSigninClick = () => {
+  const handleSigninClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log("🔐 Sign in clicked, setting selectedAction to signin");
     setSelectedAction("signin");
     // Don't show modal yet - wait for wallet connection
   };
@@ -234,7 +237,12 @@ export function AuthChoiceModal({ isOpen, onClose, onSuccess }: AuthChoiceModalP
 
               {/* Unlock Your Garage Button - Professional with Angled Borders */}
               <button
-                onClick={handleSigninClick}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSigninClick(e);
+                }}
                 className="auth-choice-btn-secondary w-full relative flex items-center justify-center gap-2 py-3.5 px-4 bg-linear-to-r from-gray-950 via-black to-gray-950 border border-blue-500/50 text-white font-sans font-semibold text-sm uppercase tracking-wide overflow-hidden group hover:border-blue-400 transition-all duration-300 cursor-pointer"
               >
                 {/* Shimmer Effect */}

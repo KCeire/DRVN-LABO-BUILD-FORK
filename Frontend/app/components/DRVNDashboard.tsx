@@ -29,11 +29,11 @@ import { DRVNPortfolio } from "./DRVNPortfolio";
 import { Settings } from "./Settings";
 import { Buster } from "./Buster";
 import { Garage } from "./Garage";
-import { useFarcasterSDK } from "../../hooks/useFarcasterSDK";
 import { useAutoWalletAuth } from "../../hooks/useAutoWalletAuth";
 import { useMiniKitNavigation } from "../../hooks/useMiniKitNavigation";
 import { useOptimizedOnboarding } from "../../hooks/useOptimizedOnboarding";
 import { useMiniAppContext } from "../../hooks/useMiniAppContext";
+import { useAppInitialization } from "../../hooks/useAppInitialization";
 // import { ImmediateValueDisplay } from "./ImmediateValueDisplay";
 import { ProgressiveActionButton } from "./ProgressiveActionButton";
 import { ConnectButton } from "./web3/ConnectButton";
@@ -52,8 +52,8 @@ export function DRVNDashboard() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Initialize Farcaster SDK (using @farcaster/miniapp-sdk - calls ready() to dismiss splash screen)
-  useFarcasterSDK();
+  // App initialization (coordinates Farcaster SDK ready, frame ready, detection, etc.)
+  useAppInitialization();
 
   // Auto wallet authentication
   const {
@@ -106,12 +106,17 @@ export function DRVNDashboard() {
     return null;
   };
 
-  // Auto-show signup modal if user doesn't exist
+  // Auto-show signup modal if user doesn't exist (mini app only)
+  // In mini apps, if user exists, auto sign-in happens and modals should stay closed
   useEffect(() => {
-    if (shouldShowSignup && !showAuthModal) {
+    if (shouldShowSignup && !showAuthModal && isInMiniApp) {
       setShowAuthModal(true);
     }
-  }, [shouldShowSignup, showAuthModal]);
+    // If user is authenticated in mini app, ensure modals are closed
+    if (isAuthenticated && showAuthModal && isInMiniApp) {
+      setShowAuthModal(false);
+    }
+  }, [shouldShowSignup, showAuthModal, isAuthenticated, isInMiniApp]);
 
   // Trigger notification slide-in animation on mount (mobile only)
   useEffect(() => {
@@ -839,14 +844,7 @@ export function DRVNDashboard() {
                         alt="DRVN VHCLS"
                         width={32}
                         height={32}
-                        className="h-8 w-auto dark:hidden"
-                      />
-                      <Image
-                        src="/Cars/DRVNWHITE.png"
-                        alt="DRVN VHCLS"
-                        width={32}
-                        height={32}
-                        className="hidden h-8 w-auto dark:block"
+                        className="h-8 w-auto"
                       />
                     </div>
                   </TooltipTrigger>
@@ -865,14 +863,7 @@ export function DRVNDashboard() {
                   alt="DRVN VHCLS"
                   width={120}
                   height={60}
-                  className="h-8 w-auto dark:hidden"
-                />
-                <Image
-                  src="/Cars/DRVNWHITE.png"
-                  alt="DRVN VHCLS"
-                  width={120}
-                  height={60}
-                  className="hidden h-8 w-auto dark:block"
+                  className="h-8 w-auto"
                 />
               </>
             )}
@@ -891,8 +882,8 @@ export function DRVNDashboard() {
                         const isActive = activePage === item.id;
                         const baseClasses = `group relative flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold overflow-hidden ${
                           isActive
-                            ? "bg-gray-50 text-[#00daa2] dark:bg-white/5 dark:text-[#00daa2]"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#00daa2] dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-[#00daa2]"
+                            ? "bg-white/5 text-[#00daa2]"
+                            : "text-gray-400 hover:bg-white/5 hover:text-[#00daa2]"
                         }`;
 
                         if (sidebarCollapsed) {
@@ -929,8 +920,8 @@ export function DRVNDashboard() {
                                       aria-hidden="true"
                                       className={`relative z-10 ${
                                         isActive
-                                          ? "text-[#00daa2] dark:text-[#00daa2]"
-                                          : "text-gray-400 group-hover:text-[#00daa2] dark:group-hover:text-[#00daa2]"
+                                          ? "text-[#00daa2]"
+                                          : "text-gray-400 group-hover:text-[#00daa2]"
                                       } size-6 shrink-0`}
                                     />
                                   </button>
@@ -974,8 +965,8 @@ export function DRVNDashboard() {
                                 aria-hidden="true"
                                 className={`relative z-10 ${
                                   isActive
-                                    ? "text-[#00daa2] dark:text-[#00daa2]"
-                                    : "text-gray-400 group-hover:text-[#00daa2] dark:group-hover:text-[#00daa2]"
+                                    ? "text-[#00daa2]"
+                                    : "text-gray-400 group-hover:text-[#00daa2]"
                                 } size-6 shrink-0`}
                               />
                               <span className="relative z-10">{item.label}</span>
@@ -988,7 +979,7 @@ export function DRVNDashboard() {
 
                 {/* Social Navigation Items */}
                 <li>
-                  <div className="text-xs/6 font-semibold text-gray-400 dark:text-gray-500">
+                  <div className="text-xs/6 font-semibold text-gray-500">
                     {!sidebarCollapsed && "Social"}
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
@@ -998,8 +989,8 @@ export function DRVNDashboard() {
                         const isActive = activePage === item.id;
                         const baseClasses = `group relative flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold overflow-hidden ${
                           isActive
-                            ? "bg-gray-50 text-[#00daa2] dark:bg-white/5 dark:text-[#00daa2]"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#00daa2] dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-[#00daa2]"
+                            ? "bg-white/5 text-[#00daa2]"
+                            : "text-gray-400 hover:bg-white/5 hover:text-[#00daa2]"
                         }`;
 
                         if (sidebarCollapsed) {
@@ -1024,8 +1015,8 @@ export function DRVNDashboard() {
                                       aria-hidden="true"
                                       className={`relative z-10 ${
                                         isActive
-                                          ? "text-[#00daa2] dark:text-[#00daa2]"
-                                          : "text-gray-400 group-hover:text-[#00daa2] dark:group-hover:text-[#00daa2]"
+                                          ? "text-[#00daa2]"
+                                          : "text-gray-400 group-hover:text-[#00daa2]"
                                       } size-6 shrink-0`}
                                     />
                                   </button>
@@ -1060,8 +1051,8 @@ export function DRVNDashboard() {
                                 aria-hidden="true"
                                 className={`relative z-10 ${
                                   isActive
-                                    ? "text-[#00daa2] dark:text-[#00daa2]"
-                                    : "text-gray-400 group-hover:text-[#00daa2] dark:group-hover:text-[#00daa2]"
+                                    ? "text-[#00daa2]"
+                                    : "text-gray-400 group-hover:text-[#00daa2]"
                                 } size-6 shrink-0`}
                               />
                               <span className="relative z-10 truncate">{item.label}</span>
@@ -1081,7 +1072,7 @@ export function DRVNDashboard() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex justify-center">
-                              <div className="size-8 rounded-full bg-gray-50 outline -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10 overflow-hidden">
+                              <div className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10 overflow-hidden">
                                 <Image
                                   src={getProfileImage()}
                                   alt="Profile"
@@ -1102,7 +1093,7 @@ export function DRVNDashboard() {
                       ) : (
                         <div className="space-y-3">
                           <div className="flex items-center gap-x-4">
-                            <div className="size-8 rounded-full bg-gray-50 outline -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10 overflow-hidden">
+                            <div className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10 overflow-hidden">
                               <Image
                                 src={getProfileImage()}
                                 alt="Profile"
@@ -1112,7 +1103,7 @@ export function DRVNDashboard() {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm/6 font-semibold text-gray-900 dark:text-white truncate">
+                              <div className="text-sm/6 font-semibold text-white truncate">
                                 @{getDisplayUsername()}
                               </div>
                               <div className="flex items-center gap-2 mt-1">
@@ -1121,7 +1112,7 @@ export function DRVNDashboard() {
                               </div>
                             </div>
                           </div>
-                          <div className="pt-3 border-t border-gray-200 dark:border-white/10">
+                          <div className="pt-3 border-t border-white/10">
                             <ConnectButton variant="sidebar" />
                           </div>
                         </div>
@@ -1199,14 +1190,7 @@ export function DRVNDashboard() {
               alt="DRVN VHCLS"
               width={120}
               height={60}
-              className="h-8 w-auto dark:hidden"
-            />
-            <Image
-              src="/Cars/DRVNWHITE.png"
-              alt="DRVN VHCLS"
-              width={120}
-              height={60}
-              className="hidden h-8 w-auto dark:block"
+              className="h-8 w-auto"
             />
           </div>
 
@@ -1246,16 +1230,16 @@ export function DRVNDashboard() {
                             }}
                             className={`group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold w-full text-left ${
                               isActive
-                                ? "bg-gray-50 text-[#00daa2] dark:bg-white/5 dark:text-[#00daa2]"
-                                : "text-gray-700 hover:bg-gray-50 hover:text-[#00daa2] dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-[#00daa2]"
+                                ? "bg-white/5 text-[#00daa2]"
+                                : "text-gray-400 hover:bg-white/5 hover:text-[#00daa2]"
                             }`}
                           >
                             <item.icon
                               aria-hidden="true"
                               className={`${
                                 isActive
-                                  ? "text-[#00daa2] dark:text-[#00daa2]"
-                                  : "text-gray-400 group-hover:text-[#00daa2] dark:group-hover:text-[#00daa2]"
+                                  ? "text-[#00daa2]"
+                                  : "text-gray-400 group-hover:text-[#00daa2]"
                               } size-6 shrink-0`}
                             />
                             {item.label}
@@ -1268,7 +1252,7 @@ export function DRVNDashboard() {
 
               {/* Social Navigation Items */}
               <li>
-                <div className="text-xs/6 font-semibold text-gray-400 dark:text-gray-500">
+                <div className="text-xs/6 font-semibold text-gray-500">
                   Social
                 </div>
                 <ul role="list" className="-mx-2 mt-2 space-y-1">
@@ -1289,16 +1273,16 @@ export function DRVNDashboard() {
                             }}
                             className={`group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold w-full text-left ${
                               isActive
-                                ? "bg-gray-50 text-[#00daa2] dark:bg-white/5 dark:text-[#00daa2]"
-                                : "text-gray-700 hover:bg-gray-50 hover:text-[#00daa2] dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-[#00daa2]"
+                                ? "bg-white/5 text-[#00daa2]"
+                                : "text-gray-400 hover:bg-white/5 hover:text-[#00daa2]"
                             }`}
                           >
                             <item.icon
                               aria-hidden="true"
                               className={`${
                                 isActive
-                                  ? "text-[#00daa2] dark:text-[#00daa2]"
-                                  : "text-gray-400 group-hover:text-[#00daa2] dark:group-hover:text-[#00daa2]"
+                                  ? "text-[#00daa2]"
+                                  : "text-gray-400 group-hover:text-[#00daa2]"
                               } size-6 shrink-0`}
                             />
                             <span className="truncate">{item.label}</span>
@@ -1316,7 +1300,7 @@ export function DRVNDashboard() {
                   <div className="px-6 py-3">
                     <div className="space-y-3">
                       <div className="flex items-center gap-x-4">
-                        <div className="size-8 rounded-full bg-gray-50 outline -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10 overflow-hidden">
+                        <div className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10 overflow-hidden">
                           <Image
                             src={getProfileImage()}
                             alt="Profile"
@@ -1326,7 +1310,7 @@ export function DRVNDashboard() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm/6 font-semibold text-gray-900 dark:text-white truncate">
+                          <div className="text-sm/6 font-semibold text-white truncate">
                             @{getDisplayUsername()}
                           </div>
                           <div className="flex items-center gap-2 mt-1">
@@ -1335,7 +1319,7 @@ export function DRVNDashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="pt-3 border-t border-gray-200 dark:border-white/10">
+                      <div className="pt-3 border-t border-white/10">
                         <ConnectButton variant="sidebar" />
                       </div>
                     </div>

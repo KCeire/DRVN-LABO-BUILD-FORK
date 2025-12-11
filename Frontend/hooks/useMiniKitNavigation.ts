@@ -1,45 +1,36 @@
 "use client";
 
-import { useOpenUrl, useComposeCast, useViewProfile } from "@coinbase/onchainkit/minikit";
-
+/**
+ * useMiniKitNavigation - Navigation helpers for mini apps
+ * 
+ * Provides fallbacks when MiniKit is not enabled, so the app works
+ * in both mini app and web/desktop contexts.
+ * 
+ * IMPORTANT: When MiniKit is disabled in OnchainKitProvider, this hook
+ * will use browser fallbacks for all navigation functions.
+ */
 export function useMiniKitNavigation() {
-  const openUrl = useOpenUrl();
-  const composeCastHook = useComposeCast();
-  const viewProfile = useViewProfile();
-
+  // Since MiniKit hooks throw errors when MiniKit is disabled,
+  // and React hooks must be called unconditionally, we provide
+  // fallback implementations that work in all contexts
+  
   const handleExternalLink = (url: string) => {
-    if (openUrl) {
-      openUrl(url);
-    } else {
-      // Fallback for non-MiniKit environments
-      window.open(url, "_blank");
-    }
+    // Always use browser fallback when MiniKit is disabled
+    window.open(url, "_blank");
   };
 
   const handleShare = (text: string, url?: string) => {
     try {
-      // Check if composeCastHook is available and has a mutate function
-      if (
-        composeCastHook &&
-        "mutate" in composeCastHook &&
-        typeof composeCastHook.mutate === "function"
-      ) {
-        composeCastHook.mutate({
+      // Use Web Share API if available
+      if (navigator.share) {
+        navigator.share({
+          title: "DRVN/VHCLS",
           text,
-          embeds: url ? [url] : [window.location.href],
+          url: url || window.location.href,
         });
       } else {
-        // Fallback for non-MiniKit environments
-        if (navigator.share) {
-          navigator.share({
-            title: "DRVN/VHCLS",
-            text,
-            url: url || window.location.href,
-          });
-        } else {
-          // Copy to clipboard fallback
-          navigator.clipboard.writeText(url || window.location.href);
-        }
+        // Copy to clipboard fallback
+        navigator.clipboard.writeText(url || window.location.href);
       }
     } catch (error) {
       console.error("Error sharing:", error);
@@ -49,20 +40,16 @@ export function useMiniKitNavigation() {
   };
 
   const handleViewProfile = (fid: number) => {
-    if (viewProfile) {
-      viewProfile(fid);
-    } else {
-      // Fallback for non-MiniKit environments
-      window.open(`https://warpcast.com/${fid}`, "_blank");
-    }
+    // Always use browser fallback when MiniKit is disabled
+    window.open(`https://warpcast.com/${fid}`, "_blank");
   };
 
   return {
     handleExternalLink,
     handleShare,
     handleViewProfile,
-    openUrl,
-    composeCast: composeCastHook,
-    viewProfile,
+    openUrl: null,
+    composeCast: null,
+    viewProfile: null,
   };
 }

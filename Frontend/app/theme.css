@@ -12,33 +12,18 @@ body {
 }
 
 :root {
-  --app-background: #ffffff;
-  --app-foreground: #111111;
-  --app-foreground-muted: #58585c;
+  /* Always use dark theme colors - no light/dark mode switching */
+  --app-background: #0a0a0f;
+  --app-foreground: #ffffff;
+  --app-foreground-muted: #c8c8d1;
   --app-accent: #00ff88;
   --app-accent-hover: #00cc6a;
   --app-accent-active: #00aa55;
-  --app-accent-light: #e6fff0;
-  --app-gray: #f5f5f5;
-  --app-gray-dark: #e0e0e0;
-  --app-card-bg: rgba(255, 255, 255, 0.4);
-  --app-card-border: rgba(0, 0, 0, 0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --app-background: #0a0a0f;
-    --app-foreground: #ffffff;
-    --app-foreground-muted: #c8c8d1;
-    --app-accent: #00ff88;
-    --app-accent-hover: #00cc6a;
-    --app-accent-active: #00aa55;
-    --app-accent-light: #1e293b;
-    --app-gray: #1a1a1f;
-    --app-gray-dark: #2a2a2f;
-    --app-card-bg: rgba(26, 26, 31, 0.4);
-    --app-card-border: rgba(0, 255, 136, 0.3);
-  }
+  --app-accent-light: #1e293b;
+  --app-gray: #1a1a1f;
+  --app-gray-dark: #2a2a2f;
+  --app-card-bg: rgba(26, 26, 31, 0.4);
+  --app-card-border: rgba(0, 255, 136, 0.3);
 }
 
 .mini-app-theme {
@@ -522,8 +507,38 @@ body {
 }
 
 /* Radix UI Portal and Overlay for Wallet Modal - Critical for modal visibility */
+/* IMPORTANT: In mini apps, ensure portal renders outside mini app container */
 [data-radix-portal] {
   z-index: 999999 !important;
+  position: fixed !important;
+}
+
+/* Ensure wallet modal portal renders correctly in mini app context */
+/* CRITICAL: In Base mini apps, portals must render outside the mini app container */
+body > [data-radix-portal] {
+  z-index: 999999 !important;
+  position: fixed !important;
+  pointer-events: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure wallet modal is visible in mini app iframe context */
+html > body > [data-radix-portal] {
+  z-index: 999999 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Force wallet modal to be visible when it exists */
+[data-testid*="ockWalletModal"],
+[data-testid*="ockConnectWallet_Modal"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 /* Radix UI Dialog Overlay (backdrop) - DRVN theme */

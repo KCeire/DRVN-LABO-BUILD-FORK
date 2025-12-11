@@ -145,7 +145,10 @@ export function WalletFirstAuthModal({ isOpen, onClose, onSuccess }: WalletFirst
     // Don't show modal yet - wait for wallet connection
   };
 
-  const handleSigninClick = () => {
+  const handleSigninClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log("🔐 Sign in clicked in wallet-first-auth-modal");
     setSelectedAction("signin");
     // Don't show modal yet - wait for wallet connection
   };
@@ -314,7 +317,12 @@ export function WalletFirstAuthModal({ isOpen, onClose, onSuccess }: WalletFirst
 
               {/* Sign In - Styled like a garage access card */}
               <Button
-                onClick={handleSigninClick}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSigninClick(e);
+                }}
                 variant="outline"
                 className="w-full border-2 border-[#00daa2] text-[#00daa2] bg-transparent font-bold font-mono h-10 text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#00daa2]/20"
               >

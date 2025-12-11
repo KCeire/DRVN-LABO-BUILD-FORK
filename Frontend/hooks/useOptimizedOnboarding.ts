@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "wagmi";
-import { useMiniKit, useIsInMiniApp } from "@coinbase/onchainkit/minikit";
 import { useAutoWalletAuth } from "./useAutoWalletAuth";
+import { useUnifiedMiniAppDetection } from "./useUnifiedMiniAppDetection";
+import { useAppInitialization } from "./useAppInitialization";
 
 interface OnboardingState {
   hasSeenFirstRender: boolean;
@@ -15,8 +16,8 @@ interface OnboardingState {
 
 export function useOptimizedOnboarding() {
   const { isConnected } = useAccount();
-  const { context, isFrameReady, setFrameReady } = useMiniKit();
-  const { isInMiniApp } = useIsInMiniApp();
+  const { isInMiniApp } = useUnifiedMiniAppDetection();
+  const { context, isFrameReady } = useAppInitialization();
 
   // Import the auto wallet auth hook to check custom authentication
   const { isAuthenticated } = useAutoWalletAuth();
@@ -29,12 +30,7 @@ export function useOptimizedOnboarding() {
     showWalletPrompt: false,
   });
 
-  // Track first render and ensure frame is ready
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
+  // Track first render (frame ready is handled by useAppInitialization)
 
   useEffect(() => {
     if (!state.hasSeenFirstRender) {

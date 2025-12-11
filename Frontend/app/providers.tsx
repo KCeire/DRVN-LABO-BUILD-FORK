@@ -11,7 +11,7 @@ export function Providers({ children }: { children: ReactNode }) {
       apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
       chain={base}
       config={{
-        paymaster: process.env.NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT,
+        // paymaster: process.env.NEXT_PUBLIC_PAYMASTER_AND_BUNDLER_ENDPOINT,
         appearance: {
           mode: "auto",
           theme: "custom",
@@ -21,8 +21,8 @@ export function Providers({ children }: { children: ReactNode }) {
         wallet: {
           display: "modal",
           preference: "all",
-          termsUrl: "https://www.decentralbros.io/terms",
-          privacyUrl: "https://www.decentralbros.io/privacy",
+          // termsUrl: "https://www.decentralbros.io/terms",
+          // privacyUrl: "https://www.decentralbros.io/privacy",
           supportedWallets: {
             rabby: false,
             trust: true,
@@ -30,11 +30,11 @@ export function Providers({ children }: { children: ReactNode }) {
           },
         },
       }}
-      miniKit={{
-        enabled: true,
-        autoConnect: true,
-        notificationProxyUrl: undefined,
-      }}
+      // miniKit={{
+      //   enabled: true,
+      //   autoConnect: true,
+      //   notificationProxyUrl: undefined,
+      // }}
     >
       {children}
     </OnchainKitProvider>

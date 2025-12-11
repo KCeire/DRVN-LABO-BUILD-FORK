@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAccount } from "wagmi";
 import { Button } from "./ui/button";
 import { Edit, Save, X, User, FileText, Shield, HelpCircle, Upload } from "lucide-react";
@@ -80,6 +80,9 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
     text: string;
   } | null>(null);
   const [usernameError, setUsernameError] = useState(""); // Username validation error
+  
+  // Ref to track if we just saved to prevent refetch from overwriting our changes
+  const justSavedRef = useRef(false);
 
   /**
    * Fetch editable user data (decrypted) for form editing
@@ -125,12 +128,31 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
   /**
    * Initialize form data when user data changes
    * This ensures the form always reflects the current user's data
+   * Skip if we just saved to prevent overwriting our changes
    */
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && !justSavedRef.current) {
       fetchEditableUserData();
     }
+    // Reset the flag after a short delay
+    if (justSavedRef.current) {
+      const timer = setTimeout(() => {
+        justSavedRef.current = false;
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
   }, [currentUser, fetchEditableUserData]);
+
+  /**
+   * Refresh data when navigating to settings page (when activeTab changes to Account)
+   * This ensures we always have the latest data when viewing the settings page
+   * Skip if we just saved to prevent overwriting our changes
+   */
+  useEffect(() => {
+    if (activeTab === "Account" && currentUser && !isEditing && !justSavedRef.current) {
+      fetchEditableUserData();
+    }
+  }, [activeTab, currentUser, isEditing, fetchEditableUserData]);
 
   // Early return if wallet not connected or user not authenticated
   // This prevents the component from rendering without proper authentication
@@ -200,7 +222,9 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
    * Skips validation if username hasn't changed
    */
   const validateUsername = async (username: string) => {
-    if (username === currentUser.username) return true;
+    // Compare with formData.username to check if it actually changed
+    const originalUsername = currentUser?.username || "";
+    if (username === originalUsername) return true;
 
     try {
       const response = await fetch("/api/auth/check-username", {
@@ -264,12 +288,27 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
       });
 
       if (response.ok) {
+        const data = await response.json();
+        // Set flag to prevent useEffect from overwriting our changes
+        justSavedRef.current = true;
+        
+        // Immediately update formData with the saved values from the API response
+        if (data.user) {
+          setFormData({
+            username: data.user.username || "",
+            firstName: data.user.firstName || "",
+            lastName: data.user.lastName || "",
+            bio: data.user.bio || "",
+            profileImage: data.user.profileImage || "",
+          });
+        }
         setMessage({ type: "success", text: "Profile updated successfully!" });
         setIsEditing(false);
         // Refresh user data in parent component to sync changes
         if (refreshUserData) {
           refreshUserData();
         }
+        // Don't refetch here - we already have the updated data and the flag prevents the useEffect from overwriting
       } else {
         const error = await response.json();
         setMessage({
@@ -289,19 +328,11 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
 
   /**
    * Handles canceling edit mode
-   * Resets form data to original values and clears any errors
+   * Resets form data to original values from server
    */
-  const handleCancel = () => {
-    // Reset form data to original values from currentUser
-    if (currentUser) {
-      setFormData({
-        username: currentUser.username || "",
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
-        bio: currentUser.bio || "",
-        profileImage: currentUser.profileImage || "",
-      });
-    }
+  const handleCancel = async () => {
+    // Reset form data to original values from server
+    await fetchEditableUserData();
     setIsEditing(false);
     setMessage(null);
     setUsernameError("");
@@ -318,17 +349,17 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
   return (
     <div className="min-h-screen bg-none">
       {/* Secondary navigation header */}
-      <header className="border-b border-gray-200 dark:border-white/5">
+      <header className="border-b border-white/5">
         <nav className="flex overflow-x-auto py-4">
           <ul
             role="list"
-            className="flex min-w-full flex-none gap-x-6 px-4 text-sm/6 font-semibold text-gray-500 sm:px-6 lg:px-8 dark:text-gray-400"
+            className="flex min-w-full flex-none gap-x-6 px-4 text-sm/6 font-semibold text-gray-400 sm:px-6 lg:px-8"
           >
             {secondaryNavigation.map((item) => (
               <li key={item.name}>
                 <button
                   onClick={() => setActiveTab(item.name)}
-                  className={item.current ? "text-[#00daa2] dark:text-[#00daa2]" : ""}
+                  className={item.current ? "text-[#00daa2]" : ""}
                 >
                   {item.name}
                 </button>
@@ -342,15 +373,15 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
         <h1 className="sr-only">Account Settings</h1>
 
         {/* Settings forms */}
-        <div className="divide-y divide-gray-200 dark:divide-white/10">
+        <div className="divide-y divide-white/10">
           {/* Account Tab - Personal Information */}
           {activeTab === "Account" && (
             <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
               <div>
-                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-base/7 font-semibold text-white">
                   Personal Information
                 </h2>
-                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-sm/6 text-gray-400">
                   Update your profile information and preferences.
                 </p>
               </div>
@@ -376,10 +407,10 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                           alt="Profile"
                           width={96}
                           height={96}
-                          className="size-24 flex-none rounded-lg bg-gray-100 object-cover outline -outline-offset-1 outline-black/5 dark:bg-gray-800 dark:outline-white/10"
+                          className="size-24 flex-none rounded-lg bg-gray-800 object-cover outline -outline-offset-1 outline-white/10"
                         />
                       ) : (
-                        <div className="size-24 flex-none rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center outline -outline-offset-1 outline-black/5 dark:outline-white/10">
+                        <div className="size-24 flex-none rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center outline -outline-offset-1 outline-white/10">
                           <User className="w-12 h-12 text-white" />
                         </div>
                       )}
@@ -389,7 +420,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                         <>
                           <label
                             htmlFor="profile-image-upload"
-                            className="cursor-pointer rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20"
+                            className="cursor-pointer rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/5 hover:bg-white/20"
                           >
                             Change avatar
                           </label>
@@ -400,7 +431,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                             onChange={handleImageUpload}
                             className="hidden"
                           />
-                          <p className="mt-2 text-xs/5 text-gray-500 dark:text-gray-400">
+                          <p className="mt-2 text-xs/5 text-gray-400">
                             JPG, GIF or PNG. 1MB max.
                           </p>
                         </>
@@ -408,7 +439,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                         <button
                           type="button"
                           onClick={() => setIsEditing(true)}
-                          className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20"
+                          className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/5 hover:bg-white/20"
                         >
                           Change avatar
                         </button>
@@ -420,7 +451,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                   <div className="sm:col-span-3">
                     <label
                       htmlFor="first-name"
-                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                      className="block text-sm/6 font-medium text-white"
                     >
                       First name
                     </label>
@@ -433,12 +464,12 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                           autoComplete="given-name"
                           value={formData.firstName}
                           onChange={(e) => handleInputChange("firstName", e.target.value)}
-                          className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-[#00daa2]"
+                          className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6"
                           placeholder="First Name"
                         />
                       ) : (
-                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
-                          {currentUser.firstName || "No first name set"}
+                        <div className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 sm:text-sm/6">
+                          {formData.firstName || "No first name set"}
                         </div>
                       )}
                     </div>
@@ -448,7 +479,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                   <div className="sm:col-span-3">
                     <label
                       htmlFor="last-name"
-                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                      className="block text-sm/6 font-medium text-white"
                     >
                       Last name
                     </label>
@@ -461,12 +492,12 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                           autoComplete="family-name"
                           value={formData.lastName}
                           onChange={(e) => handleInputChange("lastName", e.target.value)}
-                          className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-[#00daa2]"
+                          className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6"
                           placeholder="Last Name"
                         />
                       ) : (
-                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
-                          {currentUser.lastName || "No last name set"}
+                        <div className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 sm:text-sm/6">
+                          {formData.lastName || "No last name set"}
                         </div>
                       )}
                     </div>
@@ -476,7 +507,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                   <div className="col-span-full">
                     <label
                       htmlFor="username"
-                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                      className="block text-sm/6 font-medium text-white"
                     >
                       Username
                     </label>
@@ -489,13 +520,11 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                             type="text"
                             value={formData.username}
                             onChange={(e) => handleInputChange("username", e.target.value)}
-                            className={`block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 ${
+                            className={`block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 ${
                               usernameError
                                 ? "outline-red-500"
-                                : "outline-gray-300 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2]"
-                            } placeholder:text-gray-400 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 ${
-                              !usernameError && "dark:focus:outline-[#00daa2]"
-                            }`}
+                                : "outline-white/10 focus:outline focus:-outline-offset-2 focus:outline-[#00daa2]"
+                            } placeholder:text-gray-500 sm:text-sm/6`}
                             placeholder="Username"
                           />
                           {usernameError && (
@@ -503,8 +532,8 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                           )}
                         </div>
                       ) : (
-                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
-                          {currentUser.username || "No username set"}
+                        <div className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 sm:text-sm/6">
+                          {formData.username || "No username set"}
                         </div>
                       )}
                     </div>
@@ -514,7 +543,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                   <div className="col-span-full">
                     <label
                       htmlFor="bio"
-                      className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                      className="block text-sm/6 font-medium text-white"
                     >
                       Bio
                     </label>
@@ -526,12 +555,12 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                           rows={4}
                           value={formData.bio}
                           onChange={(e) => handleInputChange("bio", e.target.value)}
-                          className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-[#00daa2]"
+                          className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-[#00daa2] sm:text-sm/6"
                           placeholder="Tell us about yourself..."
                         />
                       ) : (
-                        <div className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline -outline-offset-1 outline-gray-300 min-h-[100px] sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10">
-                          {currentUser.bio || "No bio set"}
+                        <div className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline -outline-offset-1 outline-white/10 min-h-[100px] sm:text-sm/6">
+                          {formData.bio || "No bio set"}
                         </div>
                       )}
                     </div>
@@ -544,7 +573,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                     <Button
                       type="submit"
                       disabled={isLoading || isUploading}
-                      className="rounded-md bg-[#00daa2] px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#00cc6a] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00daa2] dark:shadow-none dark:hover:bg-[#00b894]"
+                      className="rounded-md bg-[#00daa2] px-3 py-2 text-sm font-semibold text-black hover:bg-[#00b894] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00daa2]"
                     >
                       {isLoading ? "Saving..." : "Save"}
                     </Button>
@@ -552,7 +581,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                       type="button"
                       variant="outline"
                       onClick={handleCancel}
-                      className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:shadow-none dark:ring-white/5 dark:hover:bg-white/20"
+                      className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/5 hover:bg-white/20"
                     >
                       Cancel
                     </Button>
@@ -566,7 +595,7 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                         e.stopPropagation();
                         setIsEditing(true);
                       }}
-                      className="rounded-md bg-[#00daa2] px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#00cc6a] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00daa2] dark:shadow-none dark:hover:bg-[#00b894]"
+                      className="rounded-md bg-[#00daa2] px-3 py-2 text-sm font-semibold text-black hover:bg-[#00b894] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00daa2]"
                     >
                       Edit Profile
                     </button>
@@ -593,22 +622,22 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
           {activeTab === "Accounts" && (
             <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
               <div>
-                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-base/7 font-semibold text-white">
                   Manage Wallets
                 </h2>
-                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-sm/6 text-gray-400">
                   Connect and manage your wallet addresses.
                 </p>
               </div>
 
               <div className="md:col-span-2">
-                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                <div className="rounded-lg bg-white/5 p-4 border border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
-                        <User className="w-4 h-4 text-gray-600 dark:text-white" />
+                      <div className="w-8 h-8 bg-white/10 rounded flex items-center justify-center">
+                        <User className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-gray-900 font-semibold dark:text-white">
+                      <span className="text-white font-semibold">
                         Manage Wallets
                       </span>
                     </div>
@@ -637,22 +666,22 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
           {activeTab === "Newsletter" && (
             <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
               <div>
-                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-base/7 font-semibold text-white">
                   Newsletter
                 </h2>
-                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-sm/6 text-gray-400">
                   Sign up for our newsletter to stay updated.
                 </p>
               </div>
 
               <div className="md:col-span-2">
-                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                <div className="rounded-lg bg-white/5 p-4 border border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
-                        <FileText className="w-4 h-4 text-gray-600 dark:text-white" />
+                      <div className="w-8 h-8 bg-white/10 rounded flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-gray-900 font-semibold dark:text-white">
+                      <span className="text-white font-semibold">
                         Sign Up For Our Newsletter
                       </span>
                     </div>
@@ -675,21 +704,21 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
           {activeTab === "About" && (
             <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
               <div>
-                <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">About</h2>
-                <p className="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">
+                <h2 className="text-base/7 font-semibold text-white">About</h2>
+                <p className="mt-1 text-sm/6 text-gray-400">
                   Legal information and support resources.
                 </p>
               </div>
 
               <div className="md:col-span-2 space-y-3">
                 {/* Legal and Policies */}
-                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                <div className="rounded-lg bg-white/5 p-4 border border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
-                        <Shield className="w-4 h-4 text-gray-600 dark:text-white" />
+                      <div className="w-8 h-8 bg-white/10 rounded flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-gray-900 font-semibold dark:text-white">
+                      <span className="text-white font-semibold">
                         Legal And Policies
                       </span>
                     </div>
@@ -712,13 +741,13 @@ export function Settings({ currentUser, isAuthenticated, refreshUserData }: Sett
                 </div>
 
                 {/* Contact and Links */}
-                <div className="rounded-lg bg-gray-50 p-4 border border-gray-200 dark:bg-white/5 dark:border-white/10">
+                <div className="rounded-lg bg-white/5 p-4 border border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center dark:bg-white/10">
-                        <HelpCircle className="w-4 h-4 text-gray-600 dark:text-white" />
+                      <div className="w-8 h-8 bg-white/10 rounded flex items-center justify-center">
+                        <HelpCircle className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-gray-900 font-semibold dark:text-white">
+                      <span className="text-white font-semibold">
                         Contact & Links
                       </span>
                     </div>

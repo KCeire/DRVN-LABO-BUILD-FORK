@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
-import { SafeArea } from "@coinbase/onchainkit/minikit";
 import { minikitConfig } from "../minikit.config";
 import { Providers } from "./providers";
 import ConditionalLayout from "./components/layout/ConditionalLayout";
@@ -24,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
       }),
+      "base:app_id": "68e840fd52acc1f7729f4d23",
     },
   };
 }
@@ -45,13 +45,11 @@ export default function RootLayout({
 }>) {
   return (
     <Providers>
-      <html lang="en">
+      <html lang="en" className="dark">
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
-          <SafeArea>
-            <ToastProvider>
-              <ConditionalLayout>{children}</ConditionalLayout>
-            </ToastProvider>
-          </SafeArea>
+          <ToastProvider>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </ToastProvider>
         </body>
       </html>
     </Providers>
