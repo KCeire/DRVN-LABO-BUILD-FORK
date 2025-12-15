@@ -39,6 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# arcade implementation tracking
+../ARCADE-IMPLEMENTATION-CHANGELOG.md
+
 .vercel
 
 .vercel

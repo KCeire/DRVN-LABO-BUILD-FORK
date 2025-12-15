@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
+    // Development mode - return mock ETH price
+    if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+      console.log('🔧 Development mode: Returning mock ETH price');
+
+      const mockPrice = 3250.75; // Mock ETH price in USD
+
+      return NextResponse.json({
+        price: mockPrice,
+        timestamp: Date.now(),
+      });
+    }
+
     console.log("🔄 Fetching ETH price from CoinGecko...");
 
     const response = await fetch(

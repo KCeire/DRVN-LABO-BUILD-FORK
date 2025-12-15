@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { MarketplaceCard, marketplaceItems } from "./ui/marketplace-card";
@@ -16,6 +17,7 @@ import {
   Coins,
   Car,
   Tag,
+  Gamepad2,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { BsSpeedometer2 } from "react-icons/bs";
@@ -34,6 +36,7 @@ import { DRVNPortfolio } from "./DRVNPortfolio";
 import { Settings } from "./Settings";
 import { Buster } from "./Buster";
 import { Garage } from "./Garage";
+import ArcadeWithNavigation from "../arcade/components/ArcadeWithNavigation";
 import { useFarcasterSDK } from "../../hooks/useFarcasterSDK";
 import { useAutoWalletAuth } from "../../hooks/useAutoWalletAuth";
 import { useMiniKitNavigation } from "../../hooks/useMiniKitNavigation";
@@ -45,6 +48,7 @@ import TotalKeysMinted from "./web3/TotalKeysMinted";
 import { HeroHeader } from "./ui/hero-header";
 
 export function DRVNDashboard() {
+  const router = useRouter();
   const { address } = useAccount();
   const [showNotification, setShowNotification] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -69,6 +73,20 @@ export function DRVNDashboard() {
 
   // Base App detection and navigation
   const { handleExternalLink, handleShare } = useMiniKitNavigation();
+
+  // Navigation helper for internal vs external URLs
+  const handleNavigation = (url: string) => {
+    console.log('🎯 Navigation clicked:', url);
+    if (url.startsWith('/')) {
+      // Internal route - use Next.js router
+      console.log('🔗 Using router.push for internal route:', url);
+      router.push(url);
+    } else {
+      // External URL - use MiniKit navigation
+      console.log('🌐 Using external link for:', url);
+      handleExternalLink(url);
+    }
+  };
 
   // Optimized onboarding
   const { canAccessProtectedFeature, isLoading: isContextLoading } =
@@ -226,6 +244,12 @@ export function DRVNDashboard() {
       id: "buster-club",
       isGreen: true,
       requiresAuth: true,
+    },
+    {
+      icon: Gamepad2,
+      label: "Arcade",
+      id: "arcade",
+      isGreen: true,
     },
     {
       icon: SettingsIcon,
@@ -693,6 +717,9 @@ export function DRVNDashboard() {
           </div>
         );
 
+      case "arcade":
+        return <ArcadeWithNavigation onBackToMain={() => setActivePage("dashboard")} />;
+
       default:
         return (
           <div className="space-y-6">
@@ -993,7 +1020,7 @@ export function DRVNDashboard() {
                         className="flex items-center gap-3 px-3 py-3 rounded-md transition-colors font-mono font-semibold w-full text-left justify-start text-gray-300 hover:text-[#00daa2] hover:bg-gray-800"
                         onClick={() => {
                           if (item.externalUrl) {
-                            handleExternalLink(item.externalUrl);
+                            handleNavigation(item.externalUrl);
                           } else {
                             setActivePage(item.id);
                           }
@@ -1087,7 +1114,7 @@ export function DRVNDashboard() {
                     }`}
                     onClick={() => {
                       if (item.externalUrl) {
-                        handleExternalLink(item.externalUrl);
+                        handleNavigation(item.externalUrl);
                       } else {
                         // Use progressive disclosure for protected features
                         if (item.requiresAuth) {
@@ -1133,7 +1160,7 @@ export function DRVNDashboard() {
                     className="flex items-center gap-3 px-3 py-3 rounded-md transition-colors font-mono font-semibold w-full text-left justify-start text-gray-300 hover:text-[#00daa2] hover:bg-gray-800"
                     onClick={() => {
                       if (item.externalUrl) {
-                        handleExternalLink(item.externalUrl);
+                        handleNavigation(item.externalUrl);
                       } else {
                         setActivePage(item.id);
                       }

@@ -4,6 +4,32 @@ import User from "@/lib/models/User";
 
 export async function POST(request: NextRequest) {
   try {
+    // Development mode - skip database authentication
+    if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+      console.log('🔧 Development mode: Returning mock user edit data');
+
+      const mockUser = {
+        id: 'dev-user-id',
+        firstName: 'Dev',
+        lastName: 'User',
+        username: 'devuser',
+        email: 'devuser@example.com',
+        xHandle: '@devuser',
+        profileImage: '/Cars/UserImage.png',
+        walletAddress: '0x1234567890123456789012345678901234567890',
+        bio: 'Development mode user for testing',
+        createdAt: new Date().toISOString(),
+      };
+
+      return NextResponse.json(
+        {
+          success: true,
+          user: mockUser,
+        },
+        { status: 200 },
+      );
+    }
+
     // Connect to database
     await dbConnect();
 
