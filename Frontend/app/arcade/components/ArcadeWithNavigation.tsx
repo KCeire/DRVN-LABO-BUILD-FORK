@@ -12,7 +12,8 @@ import {
   Upload,
   FileText,
   ChevronUp,
-  X
+  X,
+  ArrowLeft
 } from "lucide-react";
 import ArcadeDashboard from "../dashboard/page";
 import ArcadeGames from "../games/page";
@@ -33,7 +34,7 @@ interface ArcadeWithNavigationProps {
   onBackToMain?: () => void;
 }
 
-export default function ArcadeWithNavigation({ onBackToMain: _onBackToMain }: ArcadeWithNavigationProps) {
+export default function ArcadeWithNavigation({ onBackToMain }: ArcadeWithNavigationProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollToTopAfterStateUpdate } = useScrollToTopWithDelay();
@@ -168,6 +169,25 @@ export default function ArcadeWithNavigation({ onBackToMain: _onBackToMain }: Ar
         {/* Navigation */}
         <nav className="relative flex flex-1 flex-col pb-6">
           <ul role="list" className="flex flex-1 flex-col gap-y-2">
+            {/* Back to Main Menu */}
+            {onBackToMain && (
+              <li>
+                <button
+                  onClick={() => {
+                    toggleMobileMenu();
+                    onBackToMain();
+                  }}
+                  className="group flex gap-x-3 rounded-md p-3 text-sm font-semibold w-full text-left text-gray-400 hover:bg-white/5 hover:text-white"
+                >
+                  <ArrowLeft className="size-6 shrink-0 text-gray-400 group-hover:text-white" />
+                  Back to Main Menu
+                </button>
+              </li>
+            )}
+
+            {/* Divider after back button */}
+            {onBackToMain && <li className="border-t border-gray-800 my-2"></li>}
+
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
