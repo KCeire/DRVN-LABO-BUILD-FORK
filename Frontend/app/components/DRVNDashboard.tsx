@@ -1176,12 +1176,13 @@ export function DRVNDashboard() {
           </TooltipProvider>
         </div>
 
-        {/* Mobile Menu Overlay */}
-        {mobileMenuOpen && (
+        {/* Mobile Menu Overlay - Hide when arcade is active (arcade has its own menu) */}
+        {mobileMenuOpen && activePage !== "arcade" && (
           <div className="fixed inset-0 bg-black/50 md:hidden z-50" onClick={toggleMobileMenu} />
         )}
 
-        {/* Mobile Bottom Sheet - Rises from bottom */}
+        {/* Mobile Bottom Sheet - Rises from bottom - Hide when arcade is active */}
+        {activePage !== "arcade" && (
         <div
           data-mobile-sidebar
           className={`fixed bottom-0 left-0 right-0 z-60 flex flex-col gap-y-5 overflow-y-auto border-t border-[#8351a1] bg-gray-950 px-4 transform transition-transform duration-300 ease-out md:hidden rounded-t-3xl max-h-[85vh] ${
@@ -1359,6 +1360,7 @@ export function DRVNDashboard() {
             </ul>
           </nav>
         </div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -1394,29 +1396,31 @@ export function DRVNDashboard() {
           </main>
         </div>
 
-        {/* Mobile Bottom Navigation Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gray-950/40 backdrop-blur-sm px-2 py-1.5 safe-area-inset-bottom">
-          <div className="flex items-center justify-center">
-            <button
-              onClick={toggleMobileMenu}
-              className="flex flex-col items-center justify-center gap-0.5 px-6 py-1.5 rounded-full bg-transparent hover:bg-[#00daa2]/10 transition-all duration-200"
-            >
-              <ChevronUp
-                className={`h-6 w-6 text-[#00daa2] transition-transform duration-300 ${
-                  mobileMenuOpen ? "rotate-180" : "animate-pulse"
-                }`}
-                style={
-                  !mobileMenuOpen
-                    ? {
-                        animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                      }
-                    : undefined
-                }
-              />
-              <span className="text-[10px] text-[#00daa2] font-mono font-semibold">Menu</span>
-            </button>
+        {/* Mobile Bottom Navigation Bar - Hide when arcade is active (arcade has its own) */}
+        {activePage !== "arcade" && (
+          <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gray-950/40 backdrop-blur-sm px-2 py-1.5 safe-area-inset-bottom">
+            <div className="flex items-center justify-center">
+              <button
+                onClick={toggleMobileMenu}
+                className="flex flex-col items-center justify-center gap-0.5 px-6 py-1.5 rounded-full bg-transparent hover:bg-[#00daa2]/10 transition-all duration-200"
+              >
+                <ChevronUp
+                  className={`h-6 w-6 text-[#00daa2] transition-transform duration-300 ${
+                    mobileMenuOpen ? "rotate-180" : "animate-pulse"
+                  }`}
+                  style={
+                    !mobileMenuOpen
+                      ? {
+                          animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                        }
+                      : undefined
+                  }
+                />
+                <span className="text-[10px] text-[#00daa2] font-mono font-semibold">Menu</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modals */}
