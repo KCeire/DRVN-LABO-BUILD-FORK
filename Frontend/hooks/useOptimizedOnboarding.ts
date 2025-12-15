@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "wagmi";
-import { useMiniKit, useIsInMiniApp } from "@coinbase/onchainkit/minikit";
 import { useAutoWalletAuth } from "./useAutoWalletAuth";
+import { useUnifiedMiniAppDetection } from "./useUnifiedMiniAppDetection";
+import { useAppInitialization } from "./useAppInitialization";
 
 interface OnboardingState {
   hasSeenFirstRender: boolean;
@@ -15,8 +16,8 @@ interface OnboardingState {
 
 export function useOptimizedOnboarding() {
   const { isConnected } = useAccount();
-  const { context, isFrameReady, setFrameReady } = useMiniKit();
-  const { isInMiniApp } = useIsInMiniApp();
+  const { isInMiniApp } = useUnifiedMiniAppDetection();
+  const { context, isFrameReady } = useAppInitialization();
 
   // Import the auto wallet auth hook to check custom authentication
   const { isAuthenticated } = useAutoWalletAuth();
@@ -29,12 +30,7 @@ export function useOptimizedOnboarding() {
     showWalletPrompt: false,
   });
 
-  // Track first render and ensure frame is ready
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
+  // Track first render (frame ready is handled by useAppInitialization)
 
   useEffect(() => {
     if (!state.hasSeenFirstRender) {
@@ -66,7 +62,7 @@ export function useOptimizedOnboarding() {
 
       return true; // Action can proceed
     },
-    [isConnected, context?.user?.fid],
+    [isConnected, context?.user?.fid]
   );
 
   // Mark action as completed
@@ -101,8 +97,7 @@ export function useOptimizedOnboarding() {
     return {
       isPersonalized: false,
       userName: null,
-      welcomeMessage:
-        "Welcome to DRVN VHCLS! Explore our exclusive car collections.",
+      welcomeMessage: "Welcome to DRVN VHCLS! Explore our exclusive car collections.",
     };
   }, [context?.user?.fid]);
 
@@ -121,7 +116,7 @@ export function useOptimizedOnboarding() {
           return true; // Public features
       }
     },
-    [isConnected, context?.user?.fid, isAuthenticated],
+    [isConnected, context?.user?.fid, isAuthenticated]
   );
 
   // Check if we're in a mini app and context is loading

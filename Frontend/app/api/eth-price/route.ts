@@ -4,17 +4,16 @@ export async function GET() {
   try {
     // Development mode - return mock ETH price
     if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
-      console.log('🔧 Development mode: Returning mock ETH price');
-
       const mockPrice = 3250.75; // Mock ETH price in USD
-
       return NextResponse.json({
         price: mockPrice,
         timestamp: Date.now(),
       });
     }
 
-    console.log("🔄 Fetching ETH price from CoinGecko...");
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
     const response = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
@@ -22,39 +21,30 @@ export async function GET() {
         headers: {
           Accept: "application/json",
         },
-      },
+        signal: controller.signal,
+      }
     );
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      console.error("❌ CoinGecko API request failed:", response.status);
-      return NextResponse.json(
-        { error: "Failed to fetch ETH price" },
-        { status: response.status },
-      );
+      // Return error without logging - rate limits are common
+      return NextResponse.json({ error: "Failed to fetch ETH price" }, { status: response.status });
     }
 
     const data = await response.json();
     const ethPrice = data.ethereum?.usd;
 
     if (!ethPrice) {
-      console.error("❌ Invalid ETH price data:", data);
-      return NextResponse.json(
-        { error: "Invalid price data" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Invalid price data" }, { status: 500 });
     }
-
-    console.log(`✅ ETH price fetched: $${ethPrice}`);
 
     return NextResponse.json({
       price: ethPrice,
       timestamp: Date.now(),
     });
   } catch (error) {
-    console.error("❌ Error fetching ETH price:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    // Silently handle errors - network issues are expected
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
