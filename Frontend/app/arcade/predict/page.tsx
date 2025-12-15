@@ -112,7 +112,7 @@ export default function ArcadePredict() {
       <section className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-6">
         <h3 className="text-xl font-bold mb-3">More Predictions Coming Soon!</h3>
         <p className="text-gray-400 mb-4">
-          We're working on bringing you more prediction games including sports, crypto markets,
+          We&apos;re working on bringing you more prediction games including sports, crypto markets,
           and automotive industry trends. Stay tuned!
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">

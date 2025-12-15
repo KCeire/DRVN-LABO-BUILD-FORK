@@ -25,7 +25,7 @@ export async function GET() {
       .lean();
 
     // List all collections
-    let collections = [];
+    let collections: string[] = [];
     if (mongoose.connection.readyState === 1) {
       const collectionList = await mongoose.connection.db?.listCollections().toArray();
       collections = collectionList?.map(col => col.name) || [];

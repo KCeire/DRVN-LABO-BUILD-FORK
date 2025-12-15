@@ -10,7 +10,7 @@ export async function GET() {
     // Get database name and connection state
     const dbName = mongoose.connection.db?.databaseName || 'Not connected';
     const connectionState = mongoose.connection.readyState;
-    const stateMap = {
+    const stateMap: Record<number, string> = {
       0: 'Disconnected',
       1: 'Connected',
       2: 'Connecting',
@@ -18,7 +18,7 @@ export async function GET() {
     };
 
     // List collections if connected
-    let collections = [];
+    let collections: string[] = [];
     if (mongoose.connection.readyState === 1) {
       const collectionList = await mongoose.connection.db?.listCollections().toArray();
       collections = collectionList?.map(col => col.name) || [];
